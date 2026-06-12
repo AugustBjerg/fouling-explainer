@@ -32,10 +32,10 @@ export default function SlimeLayer({ opacity }: SlimeLayerProps) {
       <path d={UNDERWATER_PATH} fill={color.foulingSlime} filter="url(#slimeTexture)" />
       {/* a slightly stronger band right at the waterline where slime first takes hold */}
       <rect
-        x={HULL.bowTipX}
+        x={HULL.sternX}
         y={HULL.waterlineY - 4}
-        width={HULL.sternX - HULL.bowTipX}
-        height={34}
+        width={HULL.bowX - HULL.sternX}
+        height={24}
         fill={color.foulingSlime}
         opacity={0.5}
         filter="url(#slimeTexture)"

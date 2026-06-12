@@ -9,19 +9,19 @@ interface AlgaeLayerProps {
   coverage: number
 }
 
-// Deterministic patch anchors across the underwater band (waterline ~250 → keel ~360).
+// Deterministic patch anchors across the underwater band (waterline ~200 → keel ~280).
 // Each `threshold` is the coverage at which the patch starts to show, so growth is gradual.
 const PATCHES = [
-  { cx: 300, cy: 285, r: 46, threshold: 0.0 },
-  { cx: 520, cy: 305, r: 60, threshold: 0.1 },
-  { cx: 690, cy: 280, r: 40, threshold: 0.25 },
-  { cx: 840, cy: 315, r: 64, threshold: 0.15 },
-  { cx: 1010, cy: 290, r: 50, threshold: 0.35 },
-  { cx: 1180, cy: 310, r: 58, threshold: 0.45 },
-  { cx: 1330, cy: 285, r: 44, threshold: 0.55 },
-  { cx: 430, cy: 330, r: 38, threshold: 0.6 },
-  { cx: 760, cy: 335, r: 42, threshold: 0.7 },
-  { cx: 1110, cy: 335, r: 40, threshold: 0.75 },
+  { cx: 380, cy: 222, r: 36, threshold: 0.0 },
+  { cx: 520, cy: 240, r: 46, threshold: 0.1 },
+  { cx: 690, cy: 218, r: 32, threshold: 0.25 },
+  { cx: 840, cy: 250, r: 48, threshold: 0.15 },
+  { cx: 1010, cy: 228, r: 38, threshold: 0.35 },
+  { cx: 1180, cy: 246, r: 44, threshold: 0.45 },
+  { cx: 1210, cy: 220, r: 34, threshold: 0.55 },
+  { cx: 430, cy: 262, r: 30, threshold: 0.6 },
+  { cx: 760, cy: 266, r: 32, threshold: 0.7 },
+  { cx: 1110, cy: 264, r: 30, threshold: 0.75 },
 ] as const
 
 export default function AlgaeLayer({ coverage }: AlgaeLayerProps) {
