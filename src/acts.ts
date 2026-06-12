@@ -36,8 +36,8 @@ export const ACTS: ActMeta[] = [
  * larger ACT2_ZOOM = closer). Both are applied to .hull-stage: scale zooms about the centre,
  * then translateY (a % of scene height) lifts the submerged hull up into view.
  */
-const ACT2_ZOOM = 1.9
-const ACT2_DIVE = '-40%' // negative = move the view down, into the water
+const ACT2_ZOOM = 2.4
+const ACT2_DIVE = '-80%' // negative = move the view down, into the water (past the waterline)
 
 export const HULL_FRAMING: Record<ActNumber, string> = {
   1: 'translateX(100%)', // stern (back) third, at the surface

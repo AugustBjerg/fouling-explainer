@@ -57,9 +57,9 @@ export default function HullDefs() {
           water (green-tinted, lower-contrast), not sitting in front of it. Tinted right from
           the surface and deepening with depth. */}
       <linearGradient id="waterVeil" gradientUnits="userSpaceOnUse" x1="0" y1={HULL.waterlineY} x2="0" y2={HULL.keelY + 24}>
-        <stop offset="0%" stopColor={color.seaLit} stopOpacity={0.32} />
-        <stop offset="55%" stopColor={color.seaDeep} stopOpacity={0.62} />
-        <stop offset="100%" stopColor={color.seaDeep} stopOpacity={0.82} />
+        <stop offset="0%" stopColor={color.seaLit} stopOpacity={0.16} />
+        <stop offset="55%" stopColor={color.seaDeep} stopOpacity={0.36} />
+        <stop offset="100%" stopColor={color.seaDeep} stopOpacity={0.55} />
       </linearGradient>
 
       {/* soft glow for the sea-surface line and light rays */}
