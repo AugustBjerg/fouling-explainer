@@ -1,25 +1,105 @@
 // Design tokens — the single home for every color, type, spacing, and motion value.
-// Components import named tokens from here (e.g. color.abyss), never raw hex.
-//
-// TODO: fill these in from docs/design.md. The keys below are placeholders so the
-// shape is real; the real low-saturation deep-sea values are NOT set yet — do not
-// invent colors here, copy them from docs/design.md when building the visuals.
+// Values come straight from docs/design.md. Components import named tokens from here
+// (e.g. color.abyss) for inline SVG/JS; CSS reads the matching custom properties that
+// applyThemeVars() writes onto :root, so there is still ONE source of truth (this file).
 
+/** Low-saturation deep-sea palette (docs/design.md → Color tokens). Never use raw hex. */
 export const color = {
-  // TODO: abyss, deepWater, glowTeal, signalRust, hullSteel, foulingSlime, … (docs/design.md)
+  abyss: '#050C0E', // page background, darkest (vignette edges)
+  deepWater: '#0A1A1C', // main background field (desaturated teal)
+  deepWaterBlue: '#0B1822', // cooler blue pocket, depth variation
+  deepWaterRaised: '#102528', // cards, panels, raised surfaces
+  glowTeal: '#5E8C82', // dialed-down accent + ambient light (never neon)
+  glowTealSoft: 'rgba(94,140,130,0.12)', // ambient caustics, rim light, hover washes
+  signalRust: '#B07A4E', // the single warm signal — readouts only
+  signalRustDim: '#7E5C42', // readout at low values, before it warms up
+  textPrimary: '#DDE6E2', // body + headlines (cool off-white)
+  textMuted: '#7C918B', // captions, secondary text, labels
+  hullSteel: '#46545B', // hull plating, mid-tone
+  hullSteelLight: '#6B7A82', // specular highlight near the waterline
+  hullShadow: '#1A2528', // deep shadow on the hull (volume / far side)
+  hullPaintBelow: '#5E2E2C', // anti-fouling band below waterline (muted oxblood)
+  foulingSlime: '#35463E', // biofilm/slime film (used at low opacity)
+  foulingAlgae: '#4E5C36', // algae patches (muted olive)
+  barnacleShell: '#A7AC9E', // barnacle bodies (pale sage-grey)
+  barnacleHighlight: '#C2C4B6', // subtle top highlight on a barnacle
+  barnacleShadow: '#6E7468', // barnacle shading / contact shadow
 } as const
 
+/** Typography (docs/design.md → Typography). One family; fluid display sizes via clamp(). */
 export const font = {
-  // TODO: family + the rem scale (display/h1/h2/body/caption) from docs/design.md
+  family:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  size: {
+    display: 'clamp(2.2rem, 6vw, 3rem)', // big act titles / hero numbers
+    h1: 'clamp(1.6rem, 4.5vw, 2rem)',
+    h2: 'clamp(1.3rem, 3.5vw, 1.5rem)',
+    body: '1rem',
+    caption: '0.85rem',
+  },
+  lineHeight: {
+    tight: '1.1', // display / big numbers
+    body: '1.6',
+  },
+  weight: {
+    regular: 400,
+    medium: 500,
+    bold: 700,
+  },
 } as const
 
+/** 8px spacing scale (docs/design.md → Spacing). */
 export const space = {
-  // TODO: 8px scale — xs/sm/md/lg/xl/xxl (docs/design.md)
+  xs: '4px',
+  sm: '8px',
+  md: '16px',
+  lg: '24px',
+  xl: '40px',
+  xxl: '64px',
 } as const
 
+/** Motion tokens (docs/design.md → Motion). The "glide" is the signature move. */
 export const motion = {
-  // TODO: glide duration, fouling tween, easing token (docs/design.md)
+  glideMs: 600, // act transition: hull translateX + slight scale
+  foulingMs: 400, // fouling layers ease in when daysSinceCleaning changes
+  ambientMs: 12000, // slow drifting particles / caustic light
+  ease: 'cubic-bezier(0.4, 0.0, 0.2, 1)', // default easing
 } as const
 
-export const theme = { color, font, space, motion } as const
+/** Layout constants (docs/design.md → Spacing & layout). */
+export const layout = {
+  textMaxWidth: '720px',
+  mobileMinWidth: '360px',
+} as const
+
+export const theme = { color, font, space, motion, layout } as const
 export type Theme = typeof theme
+
+/**
+ * Writes the palette/space/motion tokens onto :root as CSS custom properties so CSS can
+ * use var(--color-abyss) etc. while this file stays the single source of truth.
+ * Called once from main.tsx. Naming: --color-<key>, --space-<key>, --font-size-<key>,
+ * --motion-<key>, --ease.
+ */
+export function applyThemeVars(root: HTMLElement = document.documentElement): void {
+  for (const [key, value] of Object.entries(color)) {
+    root.style.setProperty(`--color-${kebab(key)}`, value)
+  }
+  for (const [key, value] of Object.entries(space)) {
+    root.style.setProperty(`--space-${key}`, value)
+  }
+  for (const [key, value] of Object.entries(font.size)) {
+    root.style.setProperty(`--font-size-${key}`, value)
+  }
+  root.style.setProperty('--font-family', font.family)
+  root.style.setProperty('--line-height-body', font.lineHeight.body)
+  root.style.setProperty('--line-height-tight', font.lineHeight.tight)
+  root.style.setProperty('--motion-glide', `${motion.glideMs}ms`)
+  root.style.setProperty('--motion-fouling', `${motion.foulingMs}ms`)
+  root.style.setProperty('--ease', motion.ease)
+  root.style.setProperty('--text-max-width', layout.textMaxWidth)
+}
+
+function kebab(s: string): string {
+  return s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)
+}

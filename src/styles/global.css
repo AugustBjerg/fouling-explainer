@@ -1,35 +1,383 @@
-/* Minimal reset + the dark deep-sea background only. Real tokens come from src/theme.ts
-   / docs/design.md as the visuals get built — keep this file lean. */
+/* Global styles. Tokens come from src/theme.ts via applyThemeVars() (--color-*, --space-*,
+   --font-size-*, --motion-*). This file is layout + per-component classes only — no raw
+   palette hex (the few rgba()s here are translucent scrims/shadows, not palette colors). */
 
+/* ----------------------------------------------------------------------------- reset -- */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
-
 * {
   margin: 0;
 }
-
 html,
 body,
 #root {
   height: 100%;
 }
-
 body {
-  /* Near-black at the edges; the proper palette lands with the hull (docs/design.md). */
-  background-color: #050c0e;
-  color: #dde6e2;
-  font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.6;
+  background-color: var(--color-abyss, #050c0e);
+  color: var(--color-text-primary, #dde6e2);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
   -webkit-font-smoothing: antialiased;
 }
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+a {
+  color: var(--color-glow-teal);
+}
 
-.app-shell {
+/* Focus ring: muted sage-teal (the old "bioluminescent" token was superseded — see memory). */
+:focus-visible {
+  outline: 2px solid var(--color-glow-teal);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ----------------------------------------------------------------------------- scene -- */
+.app {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   min-height: 100%;
-  padding: 2rem;
+}
+
+/* The stage that holds the persistent hull + the active act's content. */
+.scene {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  /* a gentle top-down light gradient: brighter near the surface, black at depth */
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--color-glow-teal-soft), transparent 60%),
+    linear-gradient(180deg, var(--color-deep-water-blue) 0%, var(--color-deep-water) 45%, var(--color-abyss) 100%);
+}
+
+/* Vignette to near-black at the edges — half of why the references feel cinematic. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: inset 0 0 180px 60px rgba(5, 12, 14, 0.9);
+  background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(5, 12, 14, 0.7) 100%);
+}
+
+/* Ambient: a handful of slow particles + one soft caustic glow. Used sparingly. */
+.ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.ambient__particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-glow-teal);
+  opacity: 0.18;
+  animation: drift var(--motion-glide) linear infinite;
+  animation-duration: 14s;
+}
+@keyframes drift {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------- the hull -- */
+/* The hull is persistent and "glides" (translateX + slight scale) between acts. The
+   transform value is set inline per act in App.tsx; the transition lives here. */
+.hull-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform var(--motion-glide) var(--ease);
+  will-change: transform;
+}
+.hull-stage__svg {
+  width: min(1100px, 150%);
+  height: auto;
+  filter: drop-shadow(0 30px 60px rgba(5, 12, 14, 0.6));
+}
+
+/* --------------------------------------------------------------------------- the acts -- */
+.act {
+  position: relative;
+  z-index: 4; /* above hull + vignette so copy stays legible */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: var(--text-max-width);
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+  min-height: 100%;
+  justify-content: flex-end; /* copy sits low; hull reads above it */
+}
+.act__eyebrow {
+  font-size: var(--font-size-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.act__title {
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
+  font-weight: 700;
+  /* sit the copy on a soft scrim so it stays readable over the hull */
+  text-shadow: 0 2px 24px rgba(5, 12, 14, 0.9);
+}
+.act__lead {
+  font-size: var(--font-size-h2);
+  color: var(--color-text-primary);
+}
+.act__beats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: var(--color-text-primary);
+}
+.act__beat {
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--color-glow-teal);
+  color: var(--color-text-muted);
+}
+.act__beat strong {
+  color: var(--color-text-primary);
+}
+.act__transition {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* readable scrim behind act copy */
+.act::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(5, 12, 14, 0.78) 0%, rgba(5, 12, 14, 0.1) 70%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------------- stat cards -- */
+.stat-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+.stat-card {
+  flex: 1 1 140px;
+  padding: var(--space-md);
+  border-radius: 10px;
+  background: var(--color-deep-water-raised);
+  border: 1px solid rgba(94, 140, 130, 0.18);
+}
+.stat-card__value {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.stat-card__label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.stat-card__note {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+/* --------------------------------------------------------------------------- readouts -- */
+.readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+/* The counter "warms" toward signalRust at high fouling via --warmth (0..1), set inline. */
+.counter {
+  --warmth: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.counter__value {
+  font-size: var(--font-size-display);
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  color: color-mix(in srgb, var(--color-signal-rust-dim), var(--color-signal-rust) calc(var(--warmth) * 100%));
+}
+.counter__label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.stage-label {
+  font-size: var(--font-size-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-glow-teal);
+}
+
+/* ------------------------------------------------------------------- fouling control -- */
+.fouling-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.fouling-control__label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.fouling-control__value {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+.fouling-slider {
+  width: 100%;
+  accent-color: var(--color-glow-teal);
+  background: transparent;
+}
+.fouling-control__ticks {
+  position: relative;
+  height: 1.2em;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+.fouling-control__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------------- control bar -- */
+.controlbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: linear-gradient(0deg, var(--color-abyss), rgba(5, 12, 14, 0.6));
+  backdrop-filter: blur(4px);
+}
+.step-nav {
+  display: flex;
+  gap: var(--space-sm);
+}
+.btn {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 999px;
+  border: 1px solid rgba(94, 140, 130, 0.35);
+  background: transparent;
+  color: var(--color-text-primary);
+  transition: background var(--motion-fouling) var(--ease), border-color var(--motion-fouling) var(--ease);
+}
+.btn:hover {
+  background: var(--color-glow-teal-soft);
+}
+.btn--primary {
+  border-color: var(--color-glow-teal);
+  background: var(--color-glow-teal-soft);
+}
+.btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.step-indicator {
+  display: flex;
+  gap: var(--space-sm);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.step-dot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  padding: var(--space-xs);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+.step-dot__mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--color-text-muted);
+}
+.step-dot[aria-current='step'] {
+  color: var(--color-text-primary);
+}
+.step-dot[aria-current='step'] .step-dot__mark {
+  background: var(--color-glow-teal);
+  border-color: var(--color-glow-teal);
+  box-shadow: 0 0 10px var(--color-glow-teal-soft);
+}
+.step-dot__label {
+  display: none;
+}
+@media (min-width: 560px) {
+  .step-dot__label {
+    display: inline;
+  }
+}
+
+/* --------------------------------------------------------------------------- cta links -- */
+.cta-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+.cta-link {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 999px;
+  border: 1px solid var(--color-glow-teal);
+  background: var(--color-glow-teal-soft);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------- reduced-motion guard -- */
+/* Honour the user's OS setting AND the app-level flag (.reduced-motion on the root). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+.reduced-motion .hull-stage,
+.reduced-motion .ambient__particle,
+.reduced-motion .btn {
+  transition: none;
+  animation: none;
 }
