@@ -7,9 +7,8 @@ import { useState } from 'react'
 import { ACTS, HULL_FRAMING, type ActNumber } from './acts'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion'
 import Hull from './components/hull/Hull'
-import Act1Problem from './components/acts/Act1Problem'
 import Act2Findings from './components/acts/Act2Findings'
-import Act3Implications from './components/acts/Act3Implications'
+import ActPlaceholder from './components/acts/ActPlaceholder'
 import StepNav from './components/controls/StepNav'
 import StepIndicator from './components/controls/StepIndicator'
 
@@ -56,7 +55,8 @@ export default function App() {
 
         <div className="vignette" aria-hidden="true" />
 
-        {currentAct === 1 && <Act1Problem />}
+        {/* Acts 1 & 3 are placeholders for now (content TBD) so the hull reads clean. */}
+        {currentAct === 1 && <ActPlaceholder label="Act 1 · Problem" />}
         {currentAct === 2 && (
           <Act2Findings
             days={daysSinceCleaning}
@@ -64,7 +64,7 @@ export default function App() {
             reducedMotion={prefersReducedMotion}
           />
         )}
-        {currentAct === 3 && <Act3Implications />}
+        {currentAct === 3 && <ActPlaceholder label="Act 3 · Implications" />}
       </div>
 
       <div className="controlbar">

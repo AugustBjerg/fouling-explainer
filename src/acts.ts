@@ -18,11 +18,15 @@ export const ACTS: ActMeta[] = [
 ]
 
 /**
- * Where the camera sits on the persistent hull per act: bow (Act 1) → midship (Act 2) →
- * stern (Act 3). Applied as the hull-stage transform; CSS animates the glide (~600ms).
+ * Where the camera sits on the persistent hull per act. The hull is rendered 3× the scene
+ * width (see .hull-stage__svg), so each act frames a DISTINCT, non-overlapping third of the
+ * ship and the glide slides a full scene-width to a section not seen before:
+ *   Act 1 = forward third (bow)  ·  Act 2 = middle third (midship)  ·  Act 3 = aft third (stern).
+ * translateX is a % of the element's own (3× wide) box, so ±33.333% = exactly one third.
+ * CSS animates the glide (~600ms).
  */
 export const HULL_FRAMING: Record<ActNumber, string> = {
-  1: 'translate(16%, -2%) scale(1.06)', // near the bow, clean
-  2: 'translate(0%, 4%) scale(1.0)', // midship, where fouling is shown
-  3: 'translate(-16%, -2%) scale(1.06)', // toward the stern, clean again
+  1: 'translateX(33.333%)', // bow third in view
+  2: 'translateX(0%)', // midship third in view
+  3: 'translateX(-33.333%)', // stern third in view
 }

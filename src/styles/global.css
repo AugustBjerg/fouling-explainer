@@ -115,7 +115,10 @@ a {
   will-change: transform;
 }
 .hull-stage__svg {
-  width: min(1100px, 150%);
+  /* 3× the scene width so only one third of the hull is ever on screen; the act framing
+     (acts.ts → HULL_FRAMING) slides between non-overlapping thirds. */
+  flex: 0 0 auto;
+  width: 300%;
   height: auto;
   filter: drop-shadow(0 30px 60px rgba(5, 12, 14, 0.6));
 }
@@ -180,6 +183,28 @@ a {
   z-index: -1;
   background: linear-gradient(0deg, rgba(5, 12, 14, 0.78) 0%, rgba(5, 12, 14, 0.1) 70%, transparent 100%);
   pointer-events: none;
+}
+
+/* ----------------------------------------------------------------- act placeholders -- */
+/* No scrim, no copy — just a small tag so the hull behind stays fully visible. */
+.act-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  padding: var(--space-lg);
+  pointer-events: none;
+}
+.act-placeholder__tag {
+  font-size: var(--font-size-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px dashed rgba(124, 145, 139, 0.4);
+  border-radius: 6px;
+  background: rgba(5, 12, 14, 0.35);
 }
 
 /* ------------------------------------------------------------------------- stat cards -- */
