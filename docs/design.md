@@ -148,9 +148,12 @@ when `addedPowerPct` spikes. The visual and the number must spike *together*.
 
 ## How the hull is drawn — and how to keep it from looking cartoonish
 
-**Decision:** the hull is **hand-built inline SVG/CSS — no images, no libraries** (a deliberate
-learning goal). We are *not* aiming for photoreal; we are aiming for **stylized but believable
-and weathered**, in the spirit of the reference images. The enemy here is the flat-vector
+**Decision (updated 2026-06-12 — see `docs/memory.md`):** the hull is **hand-built inline
+SVG/CSS**, now pushed toward a **photographic, weathered** look (the first stylized pass read
+as flat). We use a **hybrid** approach: mostly hand-built SVG (lighting filters, layered
+gradients, geometry) plus **a few bundled raster textures** (grunge/grain) as overlays/bump
+sources — generated procedurally and bundled at build, never loaded externally. **No
+animation/UI libraries** still holds. Aim: believable, weathered, **strict side-on profile**. The enemy here is the flat-vector
 "cartoon" look. The rule of thumb: **flat fills + perfect geometry = cartoon; gradients +
 noise + asymmetry + soft shadows = believable.** Realism comes from these techniques, not from
 detail count.

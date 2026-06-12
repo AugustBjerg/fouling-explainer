@@ -5,6 +5,26 @@ change; date every entry. Newest at top.
 
 ---
 
+## 2026-06-12 — Hull realism direction (hybrid SVG + bundled textures)
+
+- August wants the hull to look **much more realistic** — the first stylized pass read as
+  "MS-Paint flat." We are now pushing toward a **photographic, weathered** hull, while
+  keeping the **strict side-on profile** (no 3D/perspective).
+- **Approach = hybrid:** still mostly hand-built SVG, but we may now use **a few bundled
+  raster textures** (grunge/grain/normal-ish maps) as overlays/bump sources. Constraint
+  relaxed *only* this far — textures are generated procedurally and **bundled at build, no
+  external calls** (security guardrails hold). This partially supersedes the earlier
+  "pure hand-built SVG, no images" learning-goal note below — images are allowed **as
+  bundled textures**, not as the primary rendering method.
+- **Detail priority (this round):** (1) **metal shading & lighting** — curved, lit, wet
+  steel via SVG light filters + gradients; (2) **surface detail** — plating seams, weld
+  lines, rivets, rust streaks, draft marks, weathering. Fouling organisms and
+  water/atmosphere are **out of scope for this round** (kept as-is).
+- Textures live in `public/textures/` and are regenerable via `scripts/gen-textures.mjs`
+  (plain Node + built-in zlib, no new dependencies).
+
+---
+
 ## 2026-06-12 — Design review (palette + hull realism)
 
 - August reviewed the first design pass and wanted it **less "in your face."** Palette is now
