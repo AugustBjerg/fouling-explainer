@@ -19,6 +19,15 @@ export const color = {
   hullSteelLight: '#6B7A82', // specular highlight near the waterline
   hullShadow: '#1A2528', // deep shadow on the hull (volume / far side)
   hullPaintBelow: '#5E2E2C', // anti-fouling band below waterline (muted oxblood)
+  hullWhite: '#C4CECB', // superstructure / deckhouse light paint (desaturated off-white)
+  // Daytime sea & sky (cold, overcast, photographic — muted, not tropical-bright)
+  skyTop: '#8FA1A6', // upper sky (cool overcast grey-blue)
+  skyHorizon: '#BAC6C5', // pale hazy band at the horizon
+  seaSurface: '#6E8B84', // the lit sea-surface line where air meets water
+  seaLit: '#3F5E58', // water just under the surface (daylit teal-green)
+  seaDeep: '#16292A', // deep water, darkening with depth
+  propBronzeLit: '#867A57', // propeller bronze, lit edge (muted)
+  propBronzeDark: '#322F20', // propeller bronze, shaded
   foulingSlime: '#35463E', // biofilm/slime film (used at low opacity)
   foulingAlgae: '#4E5C36', // algae patches (muted olive)
   barnacleShell: '#A7AC9E', // barnacle bodies (pale sage-grey)

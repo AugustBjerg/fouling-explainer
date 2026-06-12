@@ -22,17 +22,25 @@ export const ACTS: ActMeta[] = [
  * width (see .hull-stage__svg), so each act frames a DISTINCT, non-overlapping third of the
  * ship and the glide slides a full scene-width to a section not seen before.
  *
- * The artwork is laid out STERN (back) on the left, BOW (front) on the right, so reading
- * left→right runs back→front and advancing acts slides the hull leftward (forward motion):
- *   Act 1 = left third (STERN)  ·  Act 2 = middle third  ·  Act 3 = right third (BOW).
- * The transform is applied to .hull-stage (one scene-width wide), so a full third of the
- * 3×-wide hull is exactly translateX(±100%): +100% brings the left/stern third into view,
- * -100% the right/bow third.
- * ONLY translateX changes between acts — no translateY/scale — so the hull stays at the same
- * on-screen height throughout (no vertical level jump). CSS animates the glide (~600ms).
+ * Artwork laid out STERN (back) on the left, BOW (front) on the right, so advancing acts
+ * slides the hull leftward (back→front). The transform is on .hull-stage (one scene-width
+ * wide), so a full third is exactly translateX(±100%).
+ *
+ *   Act 1 = STERN third, at the surface (you see the waterline + the ship above it).
+ *   Act 2 = MIDSHIP, but DOVE UNDERWATER and zoomed in: the transition from Act 1 slides to
+ *           the middle, drops below the surface and zooms onto the fouling band. Stays midship
+ *           length-wise (translateX 0); the dive is translateY + scale.
+ *   Act 3 = BOW third, back at the surface.
+ *
+ * Act 2's two knobs — tweak to taste (more negative ACT2_DIVE = deeper/more underwater;
+ * larger ACT2_ZOOM = closer). Both are applied to .hull-stage: scale zooms about the centre,
+ * then translateY (a % of scene height) lifts the submerged hull up into view.
  */
+const ACT2_ZOOM = 1.9
+const ACT2_DIVE = '-40%' // negative = move the view down, into the water
+
 export const HULL_FRAMING: Record<ActNumber, string> = {
-  1: 'translateX(100%)', // stern (back) third — left of the artwork
-  2: 'translateX(0%)', // midship third
-  3: 'translateX(-100%)', // bow (front) third — right of the artwork
+  1: 'translateX(100%)', // stern (back) third, at the surface
+  2: `translateY(${ACT2_DIVE}) scale(${ACT2_ZOOM})`, // midship, dived underwater + zoomed in
+  3: 'translateX(-100%)', // bow (front) third, at the surface
 }

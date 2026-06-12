@@ -1,17 +1,23 @@
-// Underwater appendages drawn BEHIND the hull body so they read as parts tucked under it:
-// the bulbous bow (front cue) and the rudder + propeller (back cue). Each is shaded with a
-// gradient rather than a flat fill so it doesn't look like a pasted blob.
+// Stern gear drawn BEHIND the hull body so it reads as tucked under the counter: the shaft
+// boss + propeller + rudder. Shaded with gradients (no flat fills) for a believable, slightly
+// murky underwater look. (The bulbous bow is part of the hull silhouette itself — see
+// hullGeometry's HULL_PATH — not drawn here.)
 import { color } from '../../theme'
-import { BULBOUS_BOW as B, PROPELLER as P, RUDDER_PATH } from './hullGeometry'
+import { PROPELLER as P, STERN_BOSS_PATH, RUDDER_PATH } from './hullGeometry'
+
+// Propeller blades (one blade pointing up from the hub), spread at uneven angles so the disc
+// looks like a real screw rather than a symmetrical asterisk.
+const BLADE = 'M 0 -2 C -5 -6 -6 -13 -2 -16 C 0 -17.5 0 -17.5 2 -16 C 6 -13 5 -6 0 -2 Z'
+const BLADE_ANGLES = [22, 104, 178, 256, 320]
 
 export default function Appendages() {
   return (
     <g>
       <defs>
-        {/* underwater anti-fouling form: lit oxblood on top, dark beneath */}
-        <radialGradient id="bulbPaint" cx="50%" cy="35%" r="75%">
-          <stop offset="0%" stopColor={color.hullPaintBelow} />
-          <stop offset="100%" stopColor={color.hullShadow} />
+        {/* propeller bronze, lit near the hub and darkening to the blade tips */}
+        <radialGradient id="propMetal" gradientUnits="userSpaceOnUse" cx={P.cx} cy={P.cy} r={20}>
+          <stop offset="0%" stopColor={color.propBronzeLit} />
+          <stop offset="100%" stopColor={color.propBronzeDark} />
         </radialGradient>
         <linearGradient id="metalDark" gradientUnits="objectBoundingBox" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color.hullSteel} />
@@ -19,20 +25,20 @@ export default function Appendages() {
         </linearGradient>
       </defs>
 
-      {/* bulbous bow: overlaps the stem (hull is drawn over its aft side) so it stays attached */}
-      <ellipse cx={B.cx} cy={B.cy} rx={B.rx} ry={B.ry} fill="url(#bulbPaint)" />
-      <ellipse cx={B.cx + 4} cy={B.cy - 4} rx={B.rx * 0.5} ry={B.ry * 0.45} fill={color.hullPaintBelow} opacity={0.5} />
-
-      {/* rudder */}
+      {/* ---- stern gear (back) ---- */}
+      {/* rudder, hung aft of the propeller (top tucks behind the hull) */}
       <path d={RUDDER_PATH} fill="url(#metalDark)" stroke={color.hullShadow} strokeWidth={1} />
+      {/* shaft boss / skeg connecting the hull counter to the propeller */}
+      <path d={STERN_BOSS_PATH} fill={color.hullShadow} />
+      <path d={STERN_BOSS_PATH} fill="url(#metalDark)" opacity={0.6} />
 
-      {/* propeller: shaded blades around a highlighted hub */}
+      {/* propeller: shaded curved blades around a highlighted hub */}
       <g transform={`translate(${P.cx} ${P.cy})`}>
-        {[0, 60, 120, 180, 240, 300].map((deg) => (
-          <ellipse key={deg} cx={0} cy={0} rx={4.5} ry={P.r} fill="url(#metalDark)" transform={`rotate(${deg})`} />
+        {BLADE_ANGLES.map((deg) => (
+          <path key={deg} d={BLADE} fill="url(#propMetal)" transform={`rotate(${deg})`} />
         ))}
-        <circle cx={0} cy={0} r={5.5} fill={color.hullSteel} />
-        <circle cx={-1.5} cy={-1.5} r={2} fill={color.hullSteelLight} opacity={0.7} />
+        <circle cx={0} cy={0} r={4} fill="url(#propMetal)" stroke={color.propBronzeDark} strokeWidth={0.6} />
+        <circle cx={-1.2} cy={-1.2} r={1.6} fill={color.propBronzeLit} opacity={0.8} />
       </g>
     </g>
   )

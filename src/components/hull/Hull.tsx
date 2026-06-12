@@ -16,6 +16,10 @@ import HullDefs from './HullDefs'
 import HullPlating from './HullPlating'
 import Appendages from './Appendages'
 import Superstructure from './Superstructure'
+import DeckFeatures from './DeckFeatures'
+import SeaAndSky from './SeaAndSky'
+import WaterVeil from './WaterVeil'
+import EdgeShading from './EdgeShading'
 import SlimeLayer from './SlimeLayer'
 import AlgaeLayer from './AlgaeLayer'
 import Barnacle from './Barnacle'
@@ -48,6 +52,12 @@ export default function Hull({ days, reducedMotion = false }: HullProps) {
     >
       <HullDefs />
 
+      {/* environment behind the ship: air, sea, and the lit waterline */}
+      <SeaAndSky />
+
+      {/* soft shadow of the hull cast into the water, grounding it (not a flat cut-out) */}
+      <path d={HULL_PATH} fill={color.abyss} opacity={0.4} filter="url(#edgeBlur)" transform="translate(0 6)" />
+
       {/* underwater appendages, behind the hull body */}
       <Appendages />
 
@@ -67,10 +77,17 @@ export default function Hull({ days, reducedMotion = false }: HullProps) {
 
         {/* overall darkening/desaturation as the hull fouls (hullGrime) */}
         <path d={HULL_PATH} fill={color.hullShadow} opacity={grime * 0.4} style={{ transition: tween }} />
+
+        {/* 3D edge shading: inner shadow rounds the silhouette + rim highlight on lit edges */}
+        <EdgeShading />
       </g>
 
-      {/* aft superstructure, on top of the deck */}
+      {/* on-deck bulk-carrier features (hatches, cranes, forecastle) + aft superstructure */}
+      <DeckFeatures />
       <Superstructure />
+
+      {/* murk veil over the submerged hull (frontmost, below the waterline only) */}
+      <WaterVeil />
     </svg>
   )
 }

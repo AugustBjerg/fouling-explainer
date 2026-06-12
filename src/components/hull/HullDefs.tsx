@@ -40,12 +40,46 @@ export default function HullDefs() {
         <stop offset="100%" stopColor="#000" stopOpacity={0.32} />
       </linearGradient>
 
-      {/* rust bloom for stains bleeding from fittings */}
-      <radialGradient id="rustBloom">
-        <stop offset="0%" stopColor={color.signalRust} stopOpacity={0.55} />
-        <stop offset="55%" stopColor={color.signalRustDim} stopOpacity={0.35} />
-        <stop offset="100%" stopColor={color.signalRustDim} stopOpacity={0} />
-      </radialGradient>
+      {/* air above the waterline: cold overcast daylight, hazier toward the horizon */}
+      <linearGradient id="skyGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={HULL.waterlineY}>
+        <stop offset="0%" stopColor={color.skyTop} />
+        <stop offset="100%" stopColor={color.skyHorizon} />
+      </linearGradient>
+
+      {/* water below the waterline: lit just under the surface, darkening into the deep */}
+      <linearGradient id="seaGradient" gradientUnits="userSpaceOnUse" x1="0" y1={HULL.waterlineY} x2="0" y2={HULL.viewBoxHeight}>
+        <stop offset="0%" stopColor={color.seaLit} />
+        <stop offset="60%" stopColor={color.seaDeep} />
+        <stop offset="100%" stopColor={color.seaDeep} />
+      </linearGradient>
+
+      {/* murk veil drawn over the submerged hull — the underwater part is seen THROUGH the
+          water (green-tinted, lower-contrast), not sitting in front of it. Tinted right from
+          the surface and deepening with depth. */}
+      <linearGradient id="waterVeil" gradientUnits="userSpaceOnUse" x1="0" y1={HULL.waterlineY} x2="0" y2={HULL.keelY + 24}>
+        <stop offset="0%" stopColor={color.seaLit} stopOpacity={0.32} />
+        <stop offset="55%" stopColor={color.seaDeep} stopOpacity={0.62} />
+        <stop offset="100%" stopColor={color.seaDeep} stopOpacity={0.82} />
+      </linearGradient>
+
+      {/* soft glow for the sea-surface line and light rays */}
+      <filter id="softGlow" x="-20%" y="-50%" width="140%" height="200%">
+        <feGaussianBlur stdDeviation={3} />
+      </filter>
+
+      {/* blur for the hull edge shading (inner shadow + grounding shadow) so the silhouette
+          reads as a rounded, lit volume rather than a flat cut-out */}
+      <filter id="edgeBlur" x="-15%" y="-15%" width="130%" height="130%">
+        <feGaussianBlur stdDeviation={4} />
+      </filter>
+
+      {/* dark window glass reflecting the pale daytime sky at the top (shared by the
+          superstructure, deck cranes and bridge) */}
+      <linearGradient id="glassGlazing" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor={color.skyHorizon} stopOpacity={0.7} />
+        <stop offset="45%" stopColor={color.deepWaterBlue} />
+        <stop offset="100%" stopColor={color.abyss} />
+      </linearGradient>
 
       {/* curved-metal micro-specular: turbulence relief lit by a high, raking light →
           dappled glints/relief that read as brushed, slightly wet steel */}

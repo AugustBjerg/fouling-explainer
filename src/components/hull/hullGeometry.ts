@@ -26,13 +26,21 @@ export const HULL = {
   foulingMaxX: 1240,
 } as const
 
-/** Full hull outline (stern transom at left → flat bottom → raked bow at right). */
+// Bow underwater profile with the bulbous bow built straight INTO the hull outline (it is
+// part of the hull shape, not a separate blob), shared by HULL_PATH and UNDERWATER_PATH.
+const BOW_BELOW_WATERLINE = [
+  'C 1406 206 1418 220 1415 235', // forefoot bulges forward into the bulb nose
+  'C 1412 252 1390 262 1358 267', // bulb underside curving back and down
+  'Q 1305 277 1270 280', // into the flat bottom
+].join(' ')
+
+/** Full hull outline (stern transom at left → flat bottom → bulbous bow at right). */
 export const HULL_PATH = [
   'M 205 96', // stern deck corner
   'L 1340 96', // deck run to the bow base
   'Q 1392 110 1388 168', // raked stem (down-and-forward to the right)
   'L 1376 200', // stem down to the waterline
-  'Q 1386 280 1270 280', // bow bilge turn to the flat bottom
+  BOW_BELOW_WATERLINE, // bulbous bow, integrated
   'L 300 280', // flat bottom toward the stern
   'Q 195 280 195 200', // stern bilge up to the waterline
   'L 200 150', // transom rising
@@ -43,36 +51,29 @@ export const HULL_PATH = [
 export const UNDERWATER_PATH = [
   'M 195 200',
   'L 1376 200',
-  'Q 1386 280 1270 280',
+  BOW_BELOW_WATERLINE,
   'L 300 280',
   'Q 195 280 195 200 Z',
 ].join(' ')
 
-// --- Recognizable bow & stern features (so each end reads as front / back) ----------------
+// --- Recognizable stern features (so the back reads as the back) ---------------------------
 
-/** Bulbous bow: rounded bulge at the forefoot, protruding forward/right (the front cue). */
-export const BULBOUS_BOW = { cx: 1372, cy: 238, rx: 32, ry: 16 } as const
+/** Propeller hub centre, tucked under the stern counter at the end of the shaft boss. */
+export const PROPELLER = { cx: 252, cy: 270, r: 13 } as const
 
-/** Propeller hub centre at the stern; sits low so the disc peeks below the keel (back cue). */
-export const PROPELLER = { cx: 205, cy: 270, r: 16 } as const
+/** Stern boss / skeg: connects the hull counter to the propeller hub so the prop reads as
+ *  attached. Its top edge sits inside the hull silhouette (hidden behind the hull body). */
+export const STERN_BOSS_PATH = 'M 306 270 L 248 238 L 240 270 L 258 290 L 300 284 Z'
 
-/** Rudder: a fin aft of (left of) the propeller at the very stern. */
-export const RUDDER_PATH = 'M 188 208 L 172 212 L 176 284 L 188 284 Z'
+/** Rudder: a fin hung aft of (left of) the propeller; its top tucks behind the hull. */
+export const RUDDER_PATH = 'M 240 226 L 222 230 L 226 300 L 240 298 Z'
 
-/** Aft accommodation block + bridge + funnel sitting on the deck near the stern (left). */
+/** Aft accommodation block footprint; Superstructure.tsx builds the decks/bridge/funnel. */
 export const SUPERSTRUCTURE = {
-  baseX: 212,
-  baseY: 46,
-  baseW: 120,
-  baseH: 50, // base sits on the deck (baseY+baseH = deckY = 96)
-  bridgeX: 234,
-  bridgeY: 24,
-  bridgeW: 76,
-  bridgeH: 22,
-  funnelX: 252,
-  funnelY: 6,
-  funnelW: 28,
-  funnelH: 18,
+  x: 208,
+  w: 128,
+  bottomY: 96, // sits on the deck line
+  topY: 32, // top of the accommodation block (bridge/funnel/mast rise a little above)
 } as const
 
 export interface BarnaclePlacement {

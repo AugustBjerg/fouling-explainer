@@ -16,13 +16,6 @@ const SEAM_XS = Array.from({ length: 11 }, (_, i) => 330 + i * 92)
 // Rivet rows: along the sheer strake (near deck) and just above the waterline.
 const RIVET_YS = [110, HULL.waterlineY - 6]
 const RIVET_XS = Array.from({ length: 40 }, (_, i) => 332 + i * 23)
-// Rust stains bleeding from deck fittings / scuppers.
-const RUST_SPOTS = [
-  { cx: 430, cy: 150, rx: 26, ry: 40 },
-  { cx: 690, cy: 168, rx: 20, ry: 54 },
-  { cx: 980, cy: 150, rx: 24, ry: 46 },
-  { cx: 1180, cy: 172, rx: 18, ry: 50 },
-]
 
 const blend = (mode: CSSProperties['mixBlendMode'], opacity: number): CSSProperties => ({
   mixBlendMode: mode,
@@ -66,19 +59,9 @@ export default function HullPlating() {
       {/* curved-metal specular sheen */}
       <rect x={0} y={0} width={HULL.viewBoxWidth} height={HULL.viewBoxHeight} filter="url(#metalSpecular)" style={blend('screen', 0.5)} />
 
-      {/* rust stains */}
-      {RUST_SPOTS.map((s) => (
-        <ellipse key={s.cx} cx={s.cx} cy={s.cy} rx={s.rx} ry={s.ry} fill="url(#rustBloom)" />
-      ))}
-
       {/* boot-top: dark band + thin bright stripe at the waterline */}
       <rect x={X0} y={HULL.waterlineY - 3} width={SPAN} height={6} fill={color.hullShadow} opacity={0.8} />
       <rect x={X0} y={HULL.waterlineY - 4} width={SPAN} height={1.4} fill={color.hullSteelLight} opacity={0.35} />
-
-      {/* dashed draft marks near the bow (right) */}
-      {Array.from({ length: 6 }, (_, i) => (
-        <line key={i} x1={1296} y1={HULL.waterlineY - 4 - i * 11} x2={1316} y2={HULL.waterlineY - 4 - i * 11} stroke={color.textPrimary} strokeWidth={2} opacity={0.45} />
-      ))}
     </g>
   )
 }

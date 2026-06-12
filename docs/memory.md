@@ -5,6 +5,32 @@ change; date every entry. Newest at top.
 
 ---
 
+## 2026-06-12 — Act 2 dives underwater
+
+- The Act 1→2 transition now **drops below the surface and zooms in** (not a flat sideways
+  slide): Act 2 is framed **completely underwater** on the **midship** hull (length-wise centre)
+  where the fouling is examined. Act 1 and Act 3 stay at the surface (same height as each other).
+- Implemented in `acts.ts` HULL_FRAMING: Act 2 = `translateY(ACT2_DIVE) scale(ACT2_ZOOM)` on
+  `.hull-stage`. Two named knobs (`ACT2_DIVE`, `ACT2_ZOOM`) tune depth/closeness. This
+  intentionally breaks the earlier "all acts same height" rule **for Act 2 only**.
+
+---
+
+## 2026-06-12 — Scene = daytime; ship must read as a bulk carrier
+
+- **Daytime, not night.** The dark dusk scene is out — the sea/sky are now a **cold,
+  overcast daylight** (muted/photographic, not tropical-bright). Tokens: `skyTop`,
+  `skyHorizon`, `seaSurface`, `seaLit`, `seaDeep` in `theme.ts`; the scene CSS backdrop and
+  vignette were lightened to match. (Softens the original "dark deep-sea" mood, intentionally.)
+- **The hull must look like a bulk carrier**, not a bare hull: cargo-hold **hatch covers**
+  along the deck, **deck cranes** between holds, and a raised **forecastle** at the bow —
+  in `DeckFeatures.tsx`. The aft accommodation block stays the stern cue.
+- A **visible waterline** is required (the ship floats): air above, murky water below, lit
+  sea-surface line at the hull's painted waterline (`SeaAndSky` + `WaterVeil`). The fouling
+  story lives below that line.
+
+---
+
 ## 2026-06-12 — Hull realism direction (hybrid SVG + bundled textures)
 
 - August wants the hull to look **much more realistic** — the first stylized pass read as
