@@ -17,6 +17,18 @@ const SEAM_XS = Array.from({ length: 11 }, (_, i) => 330 + i * 92)
 const RIVET_YS = [110, HULL.waterlineY - 6]
 const RIVET_XS = Array.from({ length: 40 }, (_, i) => 332 + i * 23)
 
+// Vertical rust streaks weeping down the topside from deck rust points: heavy ones at the bow
+// hawse pipe (anchor-chain rust) and lighter ones under scuppers / hatch drains amidships.
+// Each fades to transparent down the steel via url(#rustStreak). y runs deck → toward waterline.
+const RUST_STREAKS = [
+  { x: 1322, w: 3, top: 100, bottom: 196 }, // hawse pipe: long, heavy anchor-chain stain
+  { x: 1333, w: 2, top: 100, bottom: 178 }, // hawse pipe: a thinner companion run
+  { x: 980, w: 2, top: 100, bottom: 150 },
+  { x: 700, w: 2.4, top: 100, bottom: 190 },
+  { x: 540, w: 2, top: 100, bottom: 142 },
+  { x: 430, w: 1.8, top: 100, bottom: 172 },
+]
+
 const blend = (mode: CSSProperties['mixBlendMode'], opacity: number): CSSProperties => ({
   mixBlendMode: mode,
   opacity,
@@ -59,9 +71,38 @@ export default function HullPlating() {
       {/* curved-metal specular sheen */}
       <rect x={0} y={0} width={HULL.viewBoxWidth} height={HULL.viewBoxHeight} filter="url(#metalSpecular)" style={blend('screen', 0.5)} />
 
+      {/* rust streaks weeping down the topside from deck rust points (hawse pipe + scuppers) */}
+      {RUST_STREAKS.map((s) => (
+        <rect key={s.x} x={s.x} y={s.top} width={s.w} height={s.bottom - s.top} fill="url(#rustStreak)" />
+      ))}
+
+      {/* directional form shadow at the turn of the bilge: the topside curves away from the
+          overhead light just above the waterline, so its lower edge falls into shadow */}
+      <rect x={X0} y={HULL.waterlineY - 34} width={SPAN} height={34} fill="url(#hullBottomShadow)" />
+
       {/* boot-top: dark band + thin bright stripe at the waterline */}
       <rect x={X0} y={HULL.waterlineY - 3} width={SPAN} height={6} fill={color.hullShadow} opacity={0.8} />
       <rect x={X0} y={HULL.waterlineY - 4} width={SPAN} height={1.4} fill={color.hullSteelLight} opacity={0.35} />
+
+      {/* waterline scum line: the grimy dark-brown tide band that collects right at the water's
+          edge — the single strongest "this is a real working ship" signal */}
+      <rect x={X0} y={HULL.waterlineY - 1.5} width={SPAN} height={3} fill={color.scumLine} opacity={0.85} />
+      <rect x={X0} y={HULL.waterlineY - 1.5} width={SPAN} height={0.8} fill={color.signalRustDim} opacity={0.3} />
+
+      {/* draft marks: tick pairs climbing the stem and the stern, painted light on the steel */}
+      {[1352, 215].map((x) => (
+        <g key={x}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <rect key={i} x={x} y={HULL.waterlineY - 4 - i * 8} width={5} height={2} fill={color.hullSteelLight} opacity={0.5} />
+          ))}
+        </g>
+      ))}
+
+      {/* Plimsoll / load-line mark amidships at the waterline (ring + reference line) */}
+      <g opacity={0.5} stroke={color.hullSteelLight} strokeWidth={1.2} fill="none">
+        <circle cx={800} cy={HULL.waterlineY} r={6} />
+        <line x1={788} y1={HULL.waterlineY} x2={812} y2={HULL.waterlineY} />
+      </g>
     </g>
   )
 }

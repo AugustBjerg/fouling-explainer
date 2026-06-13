@@ -5,7 +5,12 @@
 import { color } from '../../theme'
 import { HULL, HULL_PATH } from './hullGeometry'
 
-export default function HullDefs() {
+interface HullDefsProps {
+  /** When true, the waterline shimmer holds still (prefers-reduced-motion). */
+  reducedMotion?: boolean
+}
+
+export default function HullDefs({ reducedMotion = false }: HullDefsProps) {
   return (
     <defs>
       {/* topside steel: dark under the deck edge → mid steel → bright specular band just
@@ -66,6 +71,37 @@ export default function HullDefs() {
       <filter id="softGlow" x="-20%" y="-50%" width="140%" height="200%">
         <feGaussianBlur stdDeviation={3} />
       </filter>
+
+      {/* static fractal warp that gives the caustic light patches an organic, non-blobby shape.
+          The visible water MOTION is the wavy surface line travelling sideways (a looped
+          translate in SeaAndSky/WaterVeil) — NOT this filter — so the waves always roll one way
+          instead of breathing in and out. Scale 0 under prefers-reduced-motion. */}
+      <filter id="waterRipple" x="-15%" y="-15%" width="130%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves={2} seed={5} result="rippleNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="rippleNoise" scale={reducedMotion ? 0 : 4} xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+
+      {/* rust streak: dark, slightly rusty at the top, fading to fully transparent as it bleeds
+          down the topside steel — used for vertical weeping stains below deck rust points. */}
+      <linearGradient id="rustStreak" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor={color.signalRustDim} stopOpacity={0.55} />
+        <stop offset="45%" stopColor={color.scumLine} stopOpacity={0.3} />
+        <stop offset="100%" stopColor={color.scumLine} stopOpacity={0} />
+      </linearGradient>
+
+      {/* directional form shadow under the bridge overhang: dark right beneath the wing,
+          fading down the top of the accommodation house (light comes from above). */}
+      <linearGradient id="bridgeUndershadow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#000" stopOpacity={0.5} />
+        <stop offset="100%" stopColor="#000" stopOpacity={0} />
+      </linearGradient>
+
+      {/* directional form shadow at the turn of the bilge: the topside curves away from the
+          light just above the waterline, so the bottom of the lit steel falls into shadow. */}
+      <linearGradient id="hullBottomShadow" gradientUnits="userSpaceOnUse" x1="0" y1={HULL.waterlineY - 34} x2="0" y2={HULL.waterlineY}>
+        <stop offset="0%" stopColor="#000" stopOpacity={0} />
+        <stop offset="100%" stopColor="#000" stopOpacity={0.4} />
+      </linearGradient>
 
       {/* blur for the hull edge shading (inner shadow + grounding shadow) so the silhouette
           reads as a rounded, lit volume rather than a flat cut-out */}

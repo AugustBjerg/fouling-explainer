@@ -39,8 +39,14 @@ export const ACTS: ActMeta[] = [
 const ACT2_ZOOM = 2.4
 const ACT2_DIVE = '-80%' // negative = move the view down, into the water (past the waterline)
 
+// Acts 1 & 3 sit at the surface, pulled WAY back so the ship reads small in a wide seascape
+// (the visible third of the hull spans < half the screen width). The scale is the leftmost
+// (outermost) transform so it shrinks about the scene centre AFTER translateX has centred the
+// stern/bow third — keeping that third centred while zooming out. Lower = more zoomed out.
+const ACT_SURFACE_ZOOM = 0.42
+
 export const HULL_FRAMING: Record<ActNumber, string> = {
-  1: 'translateX(100%)', // stern (back) third, at the surface
+  1: `scale(${ACT_SURFACE_ZOOM}) translateX(100%)`, // stern (back) third, zoomed out at the surface
   2: `translateY(${ACT2_DIVE}) scale(${ACT2_ZOOM})`, // midship, dived underwater + zoomed in
-  3: 'translateX(-100%)', // bow (front) third, at the surface
+  3: `scale(${ACT_SURFACE_ZOOM}) translateX(-100%)`, // bow (front) third, zoomed out at the surface
 }

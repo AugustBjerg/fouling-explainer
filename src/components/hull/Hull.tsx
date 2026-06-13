@@ -44,16 +44,19 @@ export default function Hull({ days, reducedMotion = false }: HullProps) {
   const tween = reducedMotion ? 'none' : 'opacity 400ms cubic-bezier(0.4,0,0.2,1)'
 
   return (
+    // overflow:visible — the sea/sky bleed past the viewBox (SeaAndSky) must not be clipped,
+    // so it can still fill the screen when Acts 1 & 3 zoom the hull out
     <svg
       className="hull-stage__svg"
       viewBox={`0 0 ${HULL.viewBoxWidth} ${HULL.viewBoxHeight}`}
+      style={{ overflow: 'visible' }}
       role="img"
       aria-label="Side view of a bulk carrier: accommodation block and propeller at the stern, bulbous bow at the front; fouling builds up below the waterline as days since cleaning increase."
     >
-      <HullDefs />
+      <HullDefs reducedMotion={reducedMotion} />
 
       {/* environment behind the ship: air, sea, and the lit waterline */}
-      <SeaAndSky />
+      <SeaAndSky reducedMotion={reducedMotion} />
 
       {/* soft shadow of the hull cast into the water, grounding it (not a flat cut-out) */}
       <path d={HULL_PATH} fill={color.abyss} opacity={0.4} filter="url(#edgeBlur)" transform="translate(0 6)" />
@@ -87,7 +90,7 @@ export default function Hull({ days, reducedMotion = false }: HullProps) {
       <Superstructure />
 
       {/* murk veil over the submerged hull (frontmost, below the waterline only) */}
-      <WaterVeil />
+      <WaterVeil reducedMotion={reducedMotion} />
     </svg>
   )
 }

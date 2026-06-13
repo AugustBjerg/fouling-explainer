@@ -76,6 +76,28 @@ export const SUPERSTRUCTURE = {
   topY: 32, // top of the accommodation block (bridge/funnel/mast rise a little above)
 } as const
 
+/**
+ * Builds a gently undulating waterline across [x0..x1] at base height `baseY`, instead of a
+ * dead-straight rule, so the sea reads as water rather than a drawn line. Alternating quadratic
+ * bumps (crest up, trough down) of ~`amplitude` px every `wavelength` px. Returns an OPEN path
+ * `d` (left→right) — stroke it for the surface line, or append a closing skirt for a sea fill.
+ * SeaAndSky (behind the hull) and WaterVeil (in front) call this with identical args so the
+ * boundary and the meniscus line up exactly where they meet at the hull's ends.
+ */
+export function waterlineWave(x0: number, x1: number, baseY: number, amplitude = 4, wavelength = 150): string {
+  const segs = [`M ${x0} ${baseY}`]
+  const half = wavelength / 2
+  let x = x0
+  let dir = -1 // start with a crest (up is -y)
+  while (x < x1) {
+    const nx = Math.min(x + half, x1)
+    segs.push(`Q ${(x + nx) / 2} ${baseY + dir * amplitude} ${nx} ${baseY}`)
+    x = nx
+    dir *= -1
+  }
+  return segs.join(' ')
+}
+
 export interface BarnaclePlacement {
   id: number
   x: number

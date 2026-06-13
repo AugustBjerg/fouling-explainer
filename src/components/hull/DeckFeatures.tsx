@@ -1,9 +1,11 @@
 // On-deck features that make the ship read as a BULK CARRIER: a row of cargo-hold hatch
-// covers, pedestal deck cranes (with kingpost + lattice boom) between them, and a raised
-// forecastle (windlass, bitts, foremast) at the bow. Drawn above the deck line, with shaded
-// gradients, weathering and contact shadows so the structures sit on the deck.
+// covers (raised coaming, rubber gasket band, drain channels, securing cleats, rust streaks),
+// pedestal deck cranes between them (DeckCrane), mooring gear in the gaps (bollards, fairleads),
+// a painted safety walkway line, and a raised forecastle (windlass, bitts, chain stoppers,
+// foremast) at the bow. Everything sits above the deck line with shading + contact shadows.
 import { color } from '../../theme'
 import { HULL, SUPERSTRUCTURE as S } from './hullGeometry'
+import DeckCrane from './DeckCrane'
 
 const DECK = HULL.deckY // 96
 const X_START = S.x + S.w + 24
@@ -22,46 +24,79 @@ function shadow(cx: number, rx: number) {
 
 function Hatch({ x }: { x: number }) {
   const ribs = Math.floor(HATCH_W / 15)
+  const cleats = Math.floor(HATCH_W / 22)
   return (
     <g>
       {shadow(x + HATCH_W / 2, HATCH_W / 2 + 3)}
-      <rect x={x - 2} y={DECK - 5} width={HATCH_W + 4} height={6} fill={color.hullShadow} />
+      {/* raised coaming the cover sits on (dark base + lit top lip) */}
+      <rect x={x - 3} y={DECK - 5} width={HATCH_W + 6} height={6} fill={color.hullShadow} />
+      <rect x={x - 3} y={DECK - 5} width={HATCH_W + 6} height={1} fill={color.hullSteelLight} opacity={0.3} />
+      {/* drain channels notched along the coaming base */}
+      {Array.from({ length: cleats * 2 }, (_, i) => {
+        const dx = x + (i + 0.5) * (HATCH_W / (cleats * 2))
+        return <line key={`drain${i}`} x1={dx} y1={DECK - 1} x2={dx} y2={DECK + 0.5} stroke={color.abyss} strokeWidth={0.6} opacity={0.6} />
+      })}
+      {/* hatch cover panel */}
       <rect x={x} y={HATCH_TOP} width={HATCH_W} height={14} fill="url(#hatchFace)" />
       <rect x={x} y={HATCH_TOP} width={HATCH_W} height={2} fill={color.hullSteelLight} opacity={0.35} />
-      {Array.from({ length: ribs }, (_, i) => (
-        <line key={i} x1={x + (i + 1) * (HATCH_W / (ribs + 1))} y1={HATCH_TOP + 1} x2={x + (i + 1) * (HATCH_W / (ribs + 1))} y2={DECK - 3} stroke={color.hullShadow} strokeWidth={0.8} opacity={0.45} />
-      ))}
+      {/* rubber sealing gasket: dark inset band around the cover edge */}
+      <rect x={x + 1} y={HATCH_TOP + 1} width={HATCH_W - 2} height={12} fill="none" stroke={color.abyss} strokeWidth={0.8} opacity={0.5} />
+      {/* panel seams */}
+      {Array.from({ length: ribs }, (_, i) => {
+        const rx = x + (i + 1) * (HATCH_W / (ribs + 1))
+        return <line key={`rib${i}`} x1={rx} y1={HATCH_TOP + 1} x2={rx} y2={DECK - 3} stroke={color.hullShadow} strokeWidth={0.8} opacity={0.45} />
+      })}
+      {/* securing cleats clamping the cover down onto the coaming */}
+      {Array.from({ length: cleats }, (_, i) => {
+        const cx = x + (i + 0.5) * (HATCH_W / cleats)
+        return <rect key={`cleat${i}`} x={cx - 1} y={DECK - 6} width={2} height={3} fill={color.hullShadow} />
+      })}
+      {/* grain weathering + faint rust streaks bleeding down from the corners */}
       <rect x={x} y={HATCH_TOP} width={HATCH_W} height={14} fill="url(#grainPattern)" style={{ mixBlendMode: 'soft-light', opacity: 0.3 }} />
+      {[x + 4, x + HATCH_W - 4].map((rx) => (
+        <rect key={`rust${rx}`} x={rx} y={HATCH_TOP + 2} width={1.4} height={11} fill={color.signalRustDim} opacity={0.25} />
+      ))}
     </g>
   )
 }
 
-function Crane({ x }: { x: number }) {
-  const pivotX = x + 4
-  const pivotY = DECK - 58
-  const tipX = x + 42
-  const tipY = DECK - 70
+// A double mooring bitt (bollard pair): two short capped posts rising from the deck.
+function Bollard({ x }: { x: number }) {
   return (
     <g>
-      {shadow(x, 12)}
-      {/* tapered pedestal */}
-      <polygon points={`${x - 5},${DECK} ${x + 5},${DECK} ${x + 3.5},${DECK - 33} ${x - 3.5},${DECK - 33}`} fill="url(#craneSteel)" stroke={color.hullShadow} strokeWidth={0.6} />
-      {/* slewing house + aft counterweight + window */}
-      <rect x={x - 11} y={DECK - 47} width={26} height={15} rx={1.5} fill="url(#craneSteel)" stroke={color.hullShadow} strokeWidth={0.7} />
-      <rect x={x - 14} y={DECK - 44} width={4} height={9} fill={color.hullShadow} />
-      <rect x={x + 8} y={DECK - 44} width={5} height={4} fill="url(#glassGlazing)" />
-      <rect x={x - 11} y={DECK - 47} width={26} height={15} fill="url(#grainPattern)" style={{ mixBlendMode: 'soft-light', opacity: 0.3 }} />
-      {/* kingpost + lattice boom raised toward the bow + hook block */}
-      <rect x={pivotX - 2} y={pivotY} width={4} height={DECK - 47 - pivotY} fill="url(#craneSteel)" />
-      <polygon points={`${pivotX},${pivotY + 3} ${pivotX},${pivotY - 3} ${tipX},${tipY + 1.5} ${tipX},${tipY - 1.5}`} fill="url(#craneSteel)" />
-      <line x1={pivotX} y1={pivotY - 3} x2={tipX} y2={tipY - 1.5} stroke={color.hullSteelLight} strokeWidth={0.6} opacity={0.4} />
-      {Array.from({ length: 4 }, (_, i) => {
-        const t1 = i / 4
-        const t2 = (i + 1) / 4
-        return <line key={i} x1={pivotX + (tipX - pivotX) * t1} y1={pivotY + 3 - 6 * t1} x2={pivotX + (tipX - pivotX) * t2} y2={pivotY - 3 - 6 * t2} stroke={color.hullShadow} strokeWidth={0.5} opacity={0.5} />
+      {[0, 5].map((dx) => (
+        <g key={dx}>
+          <rect x={x + dx} y={DECK - 5} width={3} height={5} rx={1} fill="url(#craneSteel)" stroke={color.hullShadow} strokeWidth={0.4} />
+          <ellipse cx={x + dx + 1.5} cy={DECK - 5} rx={1.8} ry={0.8} fill={color.hullSteelLight} opacity={0.5} />
+        </g>
+      ))}
+    </g>
+  )
+}
+
+// A fairlead / chock: a rounded opening in a low deck-edge casting that mooring lines run through.
+function Fairlead({ x }: { x: number }) {
+  return (
+    <g>
+      <rect x={x} y={DECK - 6} width={8} height={6} rx={2} fill={color.hullShadow} />
+      <ellipse cx={x + 4} cy={DECK - 3} rx={2.2} ry={1.6} fill={color.abyss} />
+    </g>
+  )
+}
+
+// The near-side deck-edge railing: one thin top rail + evenly spaced vertical stanchions running
+// the length of the open cargo deck. Drawn in front of the deck so it reads as the foreground
+// rail catching the light — a big realism cue for almost no geometry.
+function DeckRailing({ x1, x2 }: { x1: number; x2: number }) {
+  const top = DECK - 7 // rail height above the deck line
+  const n = Math.round((x2 - x1) / 26) // stanchion spacing
+  return (
+    <g stroke={color.hullSteelLight} strokeWidth={0.7} opacity={0.4}>
+      <line x1={x1} y1={top} x2={x2} y2={top} />
+      {Array.from({ length: n + 1 }, (_, i) => {
+        const px = x1 + (i * (x2 - x1)) / n
+        return <line key={i} x1={px} y1={top} x2={px} y2={DECK} />
       })}
-      <line x1={tipX} y1={tipY} x2={tipX} y2={tipY + 18} stroke={color.textMuted} strokeWidth={0.7} />
-      <rect x={tipX - 2} y={tipY + 18} width={4} height={4} fill={color.hullShadow} />
     </g>
   )
 }
@@ -79,6 +114,10 @@ function Forecastle() {
       {/* mooring bitts */}
       {[fx + 8, fx + 40].map((bx) => (
         <rect key={bx} x={bx} y={DECK - 21} width={4} height={6} fill={color.hullShadow} />
+      ))}
+      {/* chain stoppers between the windlass and the bow chock */}
+      {[fx + 46, fx + 52].map((sx) => (
+        <rect key={`stop${sx}`} x={sx} y={DECK - 19} width={3} height={4} rx={0.5} fill={color.hullShadow} stroke={color.hullSteelLight} strokeWidth={0.3} />
       ))}
       {/* windlass: a horizontal winch (drum + end discs) */}
       <rect x={wx} y={DECK - 23} width={16} height={7} rx={1} fill="url(#craneSteel)" stroke={color.hullShadow} strokeWidth={0.5} />
@@ -108,13 +147,26 @@ export default function DeckFeatures() {
         </linearGradient>
       </defs>
 
+      {/* painted safety walkway line running fore-and-aft along the deck */}
+      <line x1={X_START - 18} y1={DECK - 0.5} x2={X_END + 10} y2={DECK - 0.5} stroke={color.glowTeal} strokeWidth={0.8} strokeDasharray="6 5" opacity={0.25} />
+
       {hatchXs.map((x) => (
         <Hatch key={x} x={x} />
       ))}
+
+      {/* mooring gear in the deck gaps fore and aft of the holds */}
+      <Bollard x={X_START - 18} />
+      <Fairlead x={X_START - 9} />
+      <Bollard x={X_END + 1} />
+      <Fairlead x={X_END - 9} />
+
       {craneXs.map((x) => (
-        <Crane key={x} x={x} />
+        <DeckCrane key={x} x={x} />
       ))}
       <Forecastle />
+
+      {/* near-side deck-edge railing along the open cargo deck (in front of the hatches/cranes) */}
+      <DeckRailing x1={X_START - 18} x2={X_END + 10} />
     </g>
   )
 }

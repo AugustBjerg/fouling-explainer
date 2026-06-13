@@ -19,6 +19,7 @@ export const color = {
   hullSteelLight: '#6B7A82', // specular highlight near the waterline
   hullShadow: '#1A2528', // deep shadow on the hull (volume / far side)
   hullPaintBelow: '#5E2E2C', // anti-fouling band below waterline (muted oxblood)
+  scumLine: '#241A11', // grimy dark-brown band right at the waterline + rust streak tails
   hullWhite: '#C4CECB', // superstructure / deckhouse light paint (desaturated off-white)
   // Daytime sea & sky (cold, overcast, photographic — muted, not tropical-bright)
   skyTop: '#8FA1A6', // upper sky (cool overcast grey-blue)
