@@ -1,12 +1,15 @@
-// Act 2 — The findings (the interactive centerpiece). The visitor drags the slider; the
-// persistent hull (owned by App) fouls in sync while these readouts climb. No plotted
-// chart, no quoted percentages thrown at them — they FEEL the curve by dragging. Copy and
-// numbers from docs/content.md.
+// Act 2 — the interactive centerpiece, laid over the dived-underwater hull. Two big readouts
+// sit on the red anti-fouling hull (left = added fuel cost, right = added energy consumption);
+// the fouling slider + nav sit at the bottom, in the water. Dragging the slider fouls the hull
+// (owned by App) and drives both readouts.
+//
+// The numbers are the REAL per-day MLP figures (findings.ts → FOULING_TABLE, from the thesis
+// CSV; the raw curve's mid-period negative dip is smoothed over on load). Shown with an explicit
+// + sign (signDisplay handles the rare zero/negative cleanly).
+import type { CSSProperties } from 'react'
 import FoulingSlider from '../controls/FoulingSlider'
-import AddedPowerCounter from '../ui/AddedPowerCounter'
-import FuelCostCounter from '../ui/FuelCostCounter'
-import StatCard from '../ui/StatCard'
-import { foulingStage, vessel, modelAccuracy, money } from '../../data/findings'
+import { addedPowerPct, fuelCostPerDayUsd, foulingLevel } from '../../data/findings'
+import { useTweenedNumber } from '../../hooks/useTweenedNumber'
 
 interface Act2FindingsProps {
   days: number
@@ -18,53 +21,48 @@ interface Act2FindingsProps {
   onNext: () => void
 }
 
-export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack, onNext }: Act2FindingsProps) {
-  return (
-    <section className="act" aria-labelledby="act2-title">
-      <p className="act__eyebrow">The findings</p>
-      <h1 id="act2-title" className="act__title">
-        Watch what a dirty hull actually costs.
-      </h1>
-      <p className="act__lead">
-        One {vessel.lengthMetres} m, {vessel.deadweightTonnes.toLocaleString()}-tonne{' '}
-        {vessel.type}. A full year of data. Drag time forward from a freshly cleaned hull.
-      </p>
+// Whole numbers with an explicit +/- sign (nothing for exact zero).
+const signed = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0, signDisplay: 'exceptZero' })
 
-      <div className="readouts">
-        <AddedPowerCounter days={days} reducedMotion={reducedMotion} />
-        <FuelCostCounter days={days} reducedMotion={reducedMotion} />
-        <div className="counter">
-          <div className="stage-label">{foulingStage(days)}</div>
-          <div className="counter__label">Hull condition</div>
+export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack, onNext }: Act2FindingsProps) {
+  const fuelCost = useTweenedNumber(fuelCostPerDayUsd(days), 400, reducedMotion)
+  const energyPct = useTweenedNumber(addedPowerPct(days), 400, reducedMotion)
+  // Both readouts "warm" from dim to rust as fouling rises (matches the design system).
+  const warmStyle = { '--warmth': foulingLevel(days) } as CSSProperties
+
+  return (
+    <section className="act2" aria-label="What a fouled hull costs">
+      {/* Big readouts over the red hull */}
+      <div className="act2__readouts" aria-live="polite">
+        <div className="act2__readout" style={warmStyle}>
+          <div className="act2__value">
+            {signed.format(Math.round(fuelCost))}
+            <span className="act2__unit">USD/day</span>
+          </div>
+          <div className="act2__caption">additional fuel cost</div>
+        </div>
+        <div className="act2__readout" style={warmStyle}>
+          <div className="act2__value">
+            {signed.format(Math.round(energyPct))}
+            <span className="act2__unit">%</span>
+          </div>
+          <div className="act2__caption">additional energy consumption</div>
         </div>
       </div>
 
-      <FoulingSlider days={days} onChange={onDaysChange} />
-
-      <div className="stat-cards">
-        <StatCard
-          value={`$${money.hullCleaningUsd.min / 1000}–${money.hullCleaningUsd.max / 1000}k`}
-          label="cost of one hull cleaning"
-          note="Left fouled long enough, the added fuel per day dwarfs this one-off cost."
-        />
-        <StatCard
-          value={`${modelAccuracy.gam.errorPct}% vs ${modelAccuracy.mlp.errorPct}%`}
-          label="simple model vs. black-box error"
-          note="The simple, explainable model nearly matched the neural net — and you could see why it said what it did."
-        />
-      </div>
-
-      <p className="act__transition">
-        One ship, one year. Treat the shape and scale as the finding — not the decimal places.
-      </p>
-
-      <div className="act__nav">
-        <button type="button" className="cta-link cta-link--ghost" onClick={onBack}>
-          ← Back
-        </button>
-        <button type="button" className="cta-link" onClick={onNext}>
-          What this means →
-        </button>
+      {/* Controls in the water, at the bottom */}
+      <div className="act2__controls">
+        <div className="act2__controls-inner">
+          <FoulingSlider days={days} onChange={onDaysChange} />
+          <div className="act__nav">
+            <button type="button" className="cta-link cta-link--ghost" onClick={onBack}>
+              ← Back
+            </button>
+            <button type="button" className="cta-link" onClick={onNext}>
+              What this means →
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )

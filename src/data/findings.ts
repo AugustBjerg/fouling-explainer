@@ -8,6 +8,10 @@
 // fuel-price basis. The hull visuals and readouts already read from these, so updating a
 // number here updates the whole site.
 
+// The real per-day figures (Act 2 readouts) come from the bundled MLP results CSV, imported as
+// a string and parsed once below (see FOULING_TABLE).
+import tableCsv from './mlp_fouling_fuel_table.csv?raw'
+
 // ---------------------------------------------------------------------------------------
 // Context stats (docs/content.md → Key numbers → Context) — used by Act 1 StatCards.
 // ---------------------------------------------------------------------------------------
@@ -56,29 +60,97 @@ export const money = {
 export const DAYS = { min: 0, max: 180 } as const
 
 // ---------------------------------------------------------------------------------------
-// Added-power curve. Anchor points are the blended estimate from docs/content.md:
-// negligible (~0-2%) plateau to ~day 75, then steep — ~+13% @150d, ~+34% @180d. The real
-// GAM/MLP curves (docs/content.md) bracket this; treat shape & scale as the finding.
-// TODO(curve): replace linear interpolation with the real per-model curve if provided.
+// Real per-day figures (the Act 2 readouts). These are the ACTUAL MLP-model results from the
+// thesis, loaded from src/data/mlp_fouling_fuel_table.csv — not estimates. The raw curve dips
+// slightly NEGATIVE through the middle of the period (the model briefly predicts below the clean
+// baseline). Those negative values are smoothed over ON LOAD — replaced by a straight line
+// between the nearest non-negative days (fillNegatives) — so the readouts never show a negative.
+// The CSV itself is left untouched as the true record.
 // ---------------------------------------------------------------------------------------
-const ADDED_POWER_ANCHORS: ReadonlyArray<readonly [days: number, pct: number]> = [
-  [0, 0],
-  [75, 2], // end of the slime plateau
-  [150, 13],
-  [180, 34],
-]
-
-/** Extra engine power needed vs. a clean hull, as a percentage (e.g. 34 = +34%). */
-export function addedPowerPct(days: number): number {
-  return interpolate(clampDays(days), ADDED_POWER_ANCHORS)
+export interface FoulingDatum {
+  day: number
+  addedFuelCostUsdPerDay: number
+  addedPowerKw: number
+  addedPowerPct: number
 }
 
-/** Estimated *added* fuel cost per day, in USD, from addedPowerPct and the fuel assumptions. */
+/** One row per day, day 0..180 (so index === day). Parsed once from the bundled CSV. */
+export const FOULING_TABLE: readonly FoulingDatum[] = parseFoulingTable(tableCsv)
+
+function parseFoulingTable(csv: string): FoulingDatum[] {
+  const rows = csv
+    .trim()
+    .split(/\r?\n/)
+    .slice(1) // skip the header row
+    .map((line) => line.split(',').map(Number))
+
+  // Sanitize each value column independently: any negative reading is replaced by interpolating
+  // between the nearest non-negative days around it.
+  const cost = fillNegatives(rows.map((r) => r[1]))
+  const kw = fillNegatives(rows.map((r) => r[2]))
+  const pct = fillNegatives(rows.map((r) => r[3]))
+
+  return rows.map((r, i) => ({
+    day: r[0],
+    addedFuelCostUsdPerDay: cost[i],
+    addedPowerKw: kw[i],
+    addedPowerPct: pct[i],
+  }))
+}
+
+/** Replaces each run of negative values with a straight line between the nearest non-negative
+ *  values on either side (held flat if a run reaches an end of the series). */
+function fillNegatives(values: number[]): number[] {
+  const out = values.slice()
+  let i = 0
+  while (i < out.length) {
+    if (out[i] >= 0) {
+      i++
+      continue
+    }
+    let end = i // first index after the negative run
+    while (end < out.length && out[end] < 0) end++
+    const before = i - 1 // nearest non-negative before the run (-1 if none)
+    const after = end // nearest non-negative after the run (length if none)
+    for (let k = i; k < end; k++) {
+      if (before >= 0 && after < out.length) {
+        const t = (k - before) / (after - before)
+        out[k] = values[before] + (values[after] - values[before]) * t
+      } else if (before >= 0) {
+        out[k] = values[before]
+      } else if (after < out.length) {
+        out[k] = values[after]
+      } else {
+        out[k] = 0
+      }
+    }
+    i = end
+  }
+  return out
+}
+
+/** Reads a column at `days`, linearly interpolating between rows (so a tween through fractional
+ *  days stays smooth) and clamping to the 0..180 range. */
+function lookup(days: number, key: keyof Omit<FoulingDatum, 'day'>): number {
+  const d = clampDays(days)
+  const lo = FOULING_TABLE[Math.floor(d)]
+  const hi = FOULING_TABLE[Math.min(FOULING_TABLE.length - 1, Math.ceil(d))]
+  return lo[key] + (hi[key] - lo[key]) * (d - Math.floor(d))
+}
+
+/** Extra engine power vs. a clean hull, as a percentage (from the table; negatives smoothed). */
+export function addedPowerPct(days: number): number {
+  return lookup(days, 'addedPowerPct')
+}
+
+/** Extra engine power vs. a clean hull, in kW (REAL). */
+export function addedPowerKw(days: number): number {
+  return lookup(days, 'addedPowerKw')
+}
+
+/** Added fuel cost per day, in USD (REAL). */
 export function fuelCostPerDayUsd(days: number): number {
-  const extraFraction = addedPowerPct(days) / 100
-  return (
-    extraFraction * money.cleanFuelBurnTonnesPerDay * money.fuelPriceUsdPerTonne
-  )
+  return lookup(days, 'addedFuelCostUsdPerDay')
 }
 
 // ---------------------------------------------------------------------------------------
@@ -99,15 +171,26 @@ export function foulingStage(days: number): FoulingStageLabel {
 // Each visual variable maps to exactly one visible thing. ramp() is clamped linear 0..1.
 // ---------------------------------------------------------------------------------------
 
+// Smooth, monotonic fouling INTENSITY (0..1), for visuals only — it drives the readout "warmth"
+// colour. Deliberately decoupled from the real table above: a colour ramp should rise steadily
+// with neglect, not flicker with model noise or dip negative mid-period. Shape mirrors the
+// headline story (flat to ~day 75, then steep).
+const FOULING_INTENSITY_ANCHORS: ReadonlyArray<readonly [days: number, level: number]> = [
+  [0, 0],
+  [75, 0.06],
+  [150, 0.4],
+  [180, 1],
+]
+
 /** 0.0 (pristine) -> 1.0 (heavily fouled ~180d). Overall fouling, slow then steep. */
 export function foulingLevel(days: number): number {
-  // TODO(curve): tie this to the real curve; for now reuse the added-power shape, normalized.
-  return addedPowerPct(days) / addedPowerPct(DAYS.max)
+  return interpolate(clampDays(days), FOULING_INTENSITY_ANCHORS)
 }
 
-/** Opacity of the slime/biofilm film. Ramps ~5->60 days, maxes ~0.6 (a thin sheen). */
+/** Opacity of the slime/biofilm film. Ramps ~5->60 days, maxes ~0.32 (a thin translucent
+ *  sheen — the SlimeLayer also fades it toward the keel so it never clouds the whole view). */
 export function slimeOpacity(days: number): number {
-  return ramp(days, 5, 60) * 0.6
+  return ramp(days, 5, 60) * 0.32
 }
 
 /** Fraction of hull covered by algae patches. Ramps ~30->120 days. */
@@ -115,9 +198,9 @@ export function algaeCoverage(days: number): number {
   return ramp(days, 30, 120)
 }
 
-/** How many barnacles to draw (0 -> ~40). Ramps ~75->180 days. */
+/** How many barnacles to draw (0 -> ~75). Ramps ~75->180 days. */
 export function barnacleDensity(days: number): number {
-  const MAX_BARNACLES = 40
+  const MAX_BARNACLES = 75 // must match Hull.tsx ALL_BARNACLES ceiling
   return Math.round(ramp(days, 75, 180) * MAX_BARNACLES)
 }
 

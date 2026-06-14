@@ -7,7 +7,8 @@
 // There is no bottom control bar: each act hands off via its own in-act CTA (Act 1's "Dive
 // deeper", Act 2's "What this means"). Arrow keys still step between acts for keyboard users.
 import { useEffect, useState } from 'react'
-import { ACTS, HULL_FRAMING, type ActNumber } from './acts'
+import { ACTS, HULL_FRAMING, act2DiveTransform, type ActNumber } from './acts'
+import { motion } from './theme'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion'
 import Hull from './components/hull/Hull'
 import Act1Problem from './components/acts/Act1Problem'
@@ -28,6 +29,17 @@ export default function App() {
   const [currentAct, setCurrentAct] = useState<ActNumber>(1)
   const [daysSinceCleaning, setDaysSinceCleaning] = useState(0)
   const prefersReducedMotion = usePrefersReducedMotion()
+
+  // Viewport aspect drives the Act 2 dive (so the waterline parks just off the top on any screen
+  // shape — see act2DiveTransform). Tracked live so it stays correct on resize / rotate.
+  const [aspect, setAspect] = useState(() =>
+    typeof window === 'undefined' ? 16 / 9 : window.innerWidth / window.innerHeight,
+  )
+  useEffect(() => {
+    const onResize = () => setAspect(window.innerWidth / window.innerHeight)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const goNext = () =>
     setCurrentAct((a) => Math.min(ACTS.length, a + 1) as ActNumber)
@@ -56,6 +68,12 @@ export default function App() {
   // so returning to Act 2 restores where they left the slider.
   const hullDays = currentAct === 2 ? daysSinceCleaning : 0
 
+  // Act 2 is the slow, cinematic dive below the waterline; the surface acts glide quickly.
+  const glideMs = currentAct === 2 ? motion.glideSlowMs : motion.glideMs
+
+  // Act 2's framing is computed from the live aspect; Acts 1 & 3 are static.
+  const hullTransform = currentAct === 2 ? act2DiveTransform(aspect) : HULL_FRAMING[currentAct]
+
   return (
     <div className={`app${prefersReducedMotion ? ' reduced-motion' : ''}`}>
       <div className="scene">
@@ -69,8 +87,11 @@ export default function App() {
           ))}
         </div>
 
-        <div className="hull-stage" style={{ transform: HULL_FRAMING[currentAct] }}>
-          <Hull days={hullDays} reducedMotion={prefersReducedMotion} />
+        <div
+          className="hull-stage"
+          style={{ transform: hullTransform, transitionDuration: `${glideMs}ms` }}
+        >
+          <Hull days={hullDays} reducedMotion={prefersReducedMotion} clearWater={currentAct === 2} />
         </div>
 
         <div className="vignette" aria-hidden="true" />

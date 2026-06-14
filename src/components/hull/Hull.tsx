@@ -2,7 +2,7 @@
 // underwater appendages (Appendages), the aft superstructure (Superstructure) and the
 // fouling layers — all driven by `days`. Every fouling amount is derived from findings.ts
 // so the hull and the Act 2 readouts always agree. Stays mounted across acts; App glides it.
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { color } from '../../theme'
 import {
   slimeOpacity,
@@ -28,12 +28,26 @@ interface HullProps {
   /** daysSinceCleaning (0..180). The single driver of every fouling visual. */
   days: number
   reducedMotion?: boolean
+  /** Act 2 dives below the surface; the murky water then clears so the hull reads through it. */
+  clearWater?: boolean
 }
 
-const MAX_BARNACLES = 40 // matches findings.ts barnacleDensity ceiling
+const MAX_BARNACLES = 75 // matches findings.ts barnacleDensity ceiling
 const ALL_BARNACLES = buildBarnaclePlacements(MAX_BARNACLES) // deterministic, built once
 
-export default function Hull({ days, reducedMotion = false }: HullProps) {
+// These layers do NOT depend on `days`, so memoize them: while the visitor drags the slider
+// (which re-renders Hull every tick), React skips re-rendering these entirely — and the browser
+// keeps their cached raster, including HullPlating's costly metalSpecular turbulence filter.
+const HullDefsMemo = memo(HullDefs)
+const SeaAndSkyMemo = memo(SeaAndSky)
+const AppendagesMemo = memo(Appendages)
+const HullPlatingMemo = memo(HullPlating)
+const SuperstructureMemo = memo(Superstructure)
+const DeckFeaturesMemo = memo(DeckFeatures)
+const EdgeShadingMemo = memo(EdgeShading)
+const WaterVeilMemo = memo(WaterVeil)
+
+export default function Hull({ days, reducedMotion = false, clearWater = false }: HullProps) {
   const slime = slimeOpacity(days)
   const algae = algaeCoverage(days)
   const density = barnacleDensity(days)
@@ -53,20 +67,20 @@ export default function Hull({ days, reducedMotion = false }: HullProps) {
       role="img"
       aria-label="Side view of a bulk carrier: accommodation block and propeller at the stern, bulbous bow at the front; fouling builds up below the waterline as days since cleaning increase."
     >
-      <HullDefs reducedMotion={reducedMotion} />
+      <HullDefsMemo reducedMotion={reducedMotion} />
 
       {/* environment behind the ship: air, sea, and the lit waterline */}
-      <SeaAndSky reducedMotion={reducedMotion} />
+      <SeaAndSkyMemo reducedMotion={reducedMotion} />
 
       {/* soft shadow of the hull cast into the water, grounding it (not a flat cut-out) */}
       <path d={HULL_PATH} fill={color.abyss} opacity={0.4} filter="url(#edgeBlur)" transform="translate(0 6)" />
 
       {/* underwater appendages, behind the hull body */}
-      <Appendages />
+      <AppendagesMemo />
 
       {/* hull body + fouling, clipped to the silhouette */}
       <g clipPath="url(#hullClip)">
-        <HullPlating />
+        <HullPlatingMemo />
 
         <g style={{ transition: tween }}>
           <SlimeLayer opacity={slime} />
@@ -82,15 +96,15 @@ export default function Hull({ days, reducedMotion = false }: HullProps) {
         <path d={HULL_PATH} fill={color.hullShadow} opacity={grime * 0.4} style={{ transition: tween }} />
 
         {/* 3D edge shading: inner shadow rounds the silhouette + rim highlight on lit edges */}
-        <EdgeShading />
+        <EdgeShadingMemo />
       </g>
 
       {/* on-deck bulk-carrier features (hatches, cranes, forecastle) + aft superstructure */}
-      <DeckFeatures />
-      <Superstructure />
+      <DeckFeaturesMemo />
+      <SuperstructureMemo />
 
       {/* murk veil over the submerged hull (frontmost, below the waterline only) */}
-      <WaterVeil reducedMotion={reducedMotion} />
+      <WaterVeilMemo reducedMotion={reducedMotion} clearWater={clearWater} />
     </svg>
   )
 }

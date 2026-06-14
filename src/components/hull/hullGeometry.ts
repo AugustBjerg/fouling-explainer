@@ -105,36 +105,42 @@ export interface BarnaclePlacement {
   scale: number // per-instance size jitter (multiplied by barnacleSize later)
   rotation: number // degrees
   shadeJitter: number // -1..1, nudges the shell colour so the colony isn't uniform
+  variant: 0 | 1 | 2 // which shell shape Barnacle.tsx draws: 0 broad acorn, 1 tall cone, 2 cluster
 }
 
 /**
  * Deterministically lays out up to `max` barnacles, clustered like a colony (dense
- * patches, sparse gaps) rather than an even grid. Seeded so they never reshuffle between
- * renders; the Barnacle layer shows the first `barnacleDensity` of them.
+ * patches, sparse gaps) rather than an even grid. Cluster centres are spread one-per-slice
+ * across the band (with jitter) so the colony has texture but no large empty stretch — wherever
+ * the camera frames the midship band, some barnacles are in view. Seeded so they never reshuffle
+ * between renders; the Barnacle layer shows the first `barnacleDensity` of them.
  */
 export function buildBarnaclePlacements(max: number): BarnaclePlacement[] {
   const rand = mulberry32(0xb0a7) // fixed seed → stable colony
   const { foulingMinX, foulingMaxX, waterlineY, keelY } = HULL
 
-  // A few cluster centres along the underwater band.
-  const clusterCount = 6
-  const clusters = Array.from({ length: clusterCount }, () => ({
-    cx: foulingMinX + rand() * (foulingMaxX - foulingMinX),
+  // Cluster centres: one anchored in each equal slice of the band, jittered within its slice so
+  // the spacing reads organic rather than gridded but never leaves a wide gap.
+  const clusterCount = 11
+  const sliceW = (foulingMaxX - foulingMinX) / clusterCount
+  const clusters = Array.from({ length: clusterCount }, (_, i) => ({
+    cx: foulingMinX + sliceW * (i + 0.5) + (rand() - 0.5) * sliceW * 0.7,
     cy: waterlineY + 16 + rand() * (keelY - waterlineY - 28),
   }))
 
   const placements: BarnaclePlacement[] = []
   for (let i = 0; i < max; i++) {
     const c = clusters[Math.floor(rand() * clusterCount)]
-    const spreadX = (rand() - 0.5) * 220
-    const spreadY = (rand() - 0.5) * 50
+    const spreadX = (rand() - 0.5) * 150
+    const spreadY = (rand() - 0.5) * 46
     placements.push({
       id: i,
       x: clamp(c.cx + spreadX, foulingMinX, foulingMaxX),
-      y: clamp(c.cy + spreadY, waterlineY + 10, keelY - 10),
-      scale: 0.6 + rand() * 0.8,
-      rotation: (rand() - 0.5) * 30,
+      y: clamp(c.cy + spreadY, waterlineY + 10, keelY - 8),
+      scale: 0.55 + rand() * 0.55,
+      rotation: (rand() - 0.5) * 24,
       shadeJitter: rand() * 2 - 1,
+      variant: Math.floor(rand() * 3) as 0 | 1 | 2,
     })
   }
   return placements

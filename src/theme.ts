@@ -32,9 +32,13 @@ export const color = {
   propBronzeDark: '#322F20', // propeller bronze, shaded
   foulingSlime: '#35463E', // biofilm/slime film (used at low opacity)
   foulingAlgae: '#4E5C36', // algae patches (muted olive)
+  foulingAlgaeBright: '#67793F', // lit tips of algae fronds (slightly fresher green)
+  foulingAlgaeDark: '#2E3A22', // shaded base of algae tufts
   barnacleShell: '#A7AC9E', // barnacle bodies (pale sage-grey)
-  barnacleHighlight: '#C2C4B6', // subtle top highlight on a barnacle
+  barnacleShellWorn: '#8A9082', // older/algae-stained shells (darker, olive-grey)
+  barnacleHighlight: '#C8CABD', // subtle top highlight / lit rim on a barnacle
   barnacleShadow: '#6E7468', // barnacle shading / contact shadow
+  barnacleSeam: '#4C5249', // dark grooves between a barnacle's wall plates + the open mouth
 } as const
 
 /** Typography (docs/design.md → Typography). One family; fluid display sizes via clamp(). */
@@ -72,6 +76,7 @@ export const space = {
 /** Motion tokens (docs/design.md → Motion). The "glide" is the signature move. */
 export const motion = {
   glideMs: 600, // act transition: hull translateX + slight scale
+  glideSlowMs: 1600, // the slower, cinematic dive into Act 2 (below the waterline)
   foulingMs: 400, // fouling layers ease in when daysSinceCleaning changes
   ambientMs: 12000, // slow drifting particles / caustic light
   ease: 'cubic-bezier(0.4, 0.0, 0.2, 1)', // default easing

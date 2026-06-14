@@ -1,5 +1,6 @@
 // The three-act model: shared metadata so navigation, the step indicator, and the hull
 // framing all read from one place (docs/structure.md → Top-level model).
+import { HULL } from './components/hull/hullGeometry'
 
 export type ActNumber = 1 | 2 | 3
 
@@ -32,12 +33,35 @@ export const ACTS: ActMeta[] = [
  *           length-wise (translateX 0); the dive is translateY + scale.
  *   Act 3 = BOW third, back at the surface.
  *
- * Act 2's two knobs — tweak to taste (more negative ACT2_DIVE = deeper/more underwater;
- * larger ACT2_ZOOM = closer). Both are applied to .hull-stage: scale zooms about the centre,
- * then translateY (a % of scene height) lifts the submerged hull up into view.
+ * Act 2's two knobs: ACT2_ZOOM (larger = closer) and ACT2_WATERLINE_TARGET (where the waterline
+ * parks vertically). The dive amount is COMPUTED from the target by act2DiveTransform() so the
+ * waterline lands in the same spot on any screen shape — see that function.
  */
 const ACT2_ZOOM = 2.4
-const ACT2_DIVE = '-80%' // negative = move the view down, into the water (past the waterline)
+// Where to park the waterline, as a fraction of scene height from the top (negative = just OFF
+// the top, so Act 2 sits wholly below the surface — only the red anti-fouling hull is in view).
+const ACT2_WATERLINE_TARGET = -0.06
+
+/**
+ * Act 2 dive transform, COMPUTED from the viewport aspect (sceneWidth / sceneHeight).
+ *
+ * Why compute it: the hull <svg> is sized by WIDTH (width:300%), so its on-screen height — and
+ * therefore where the waterline falls — depends on the viewport's aspect ratio. A fixed
+ * translateY% would put the waterline in a different place on every screen (and on a tall phone
+ * could push the whole hull off-screen). Instead we solve for the translateY that lands the
+ * waterline at ACT2_WATERLINE_TARGET for the given aspect.
+ *
+ * Derivation (all in units of scene height; transform-origin is the scene centre = 0.5):
+ *   svg height / scene height           = 3 · aspect · (viewBoxHeight / viewBoxWidth)
+ *   waterline offset from scene centre  = svgHeight · (waterlineY / viewBoxHeight − 0.5)
+ *   after scale Z then translate D:  y = 0.5 + Z · offset + D    →  solve y = target for D.
+ */
+export function act2DiveTransform(aspect: number): string {
+  const svgHeightInScenes = 3 * aspect * (HULL.viewBoxHeight / HULL.viewBoxWidth)
+  const waterlineFromCentre = svgHeightInScenes * (HULL.waterlineY / HULL.viewBoxHeight - 0.5)
+  const dive = ACT2_WATERLINE_TARGET - 0.5 - ACT2_ZOOM * waterlineFromCentre
+  return `translateY(${(dive * 100).toFixed(1)}%) scale(${ACT2_ZOOM})`
+}
 
 // Acts 1 & 3 sit at the surface, pulled WAY back so the ship reads small in a wide seascape.
 // The scale is the leftmost (outermost) transform so it shrinks about the scene centre AFTER
@@ -56,8 +80,10 @@ const ACT1_SURFACE_ZOOM = 0.25
 // outermost (screen space, like ACT2_DIVE) so the zoom doesn't scale it.
 const ACT1_SHIP_DROP = '18%'
 
+// Acts 1 & 3 are framed statically. Act 2's value here is a sensible default (≈ a 16:9 desktop);
+// App.tsx recomputes it per render with the live viewport aspect via act2DiveTransform().
 export const HULL_FRAMING: Record<ActNumber, string> = {
   1: `translateY(${ACT1_SHIP_DROP}) scale(${ACT1_SURFACE_ZOOM}) translateX(100%)`, // stern third, surface, small + low: sky room for the intro copy
-  2: `translateY(${ACT2_DIVE}) scale(${ACT2_ZOOM})`, // midship, dived underwater + zoomed in
+  2: act2DiveTransform(16 / 9), // midship, dived underwater + zoomed in (recomputed in App for the real aspect)
   3: `scale(${ACT_SURFACE_ZOOM}) translateX(-100%)`, // bow (front) third, zoomed out at the surface
 }

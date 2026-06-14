@@ -1,6 +1,7 @@
 // Drawn in FRONT of the submerged hull so the ship reads as sitting IN the water, not in
 // front of it: a murk veil tinting the underwater hull, a bright scattering band right under
 // the surface, and a thin surface meniscus that crosses the hull at the waterline.
+import type { CSSProperties } from 'react'
 import { color } from '../../theme'
 import { HULL, waterlineWave } from './hullGeometry'
 
@@ -43,14 +44,29 @@ function Drift({ reducedMotion }: { reducedMotion: boolean }) {
   )
 }
 
-export default function WaterVeil({ reducedMotion = false }: { reducedMotion?: boolean }) {
+interface WaterVeilProps {
+  reducedMotion?: boolean
+  /** When the camera has dived into Act 2, the murk thins so the hull reads through clearer water. */
+  clearWater?: boolean
+}
+
+export default function WaterVeil({ reducedMotion = false, clearWater = false }: WaterVeilProps) {
+  // Fade the murk down once we've dived; delay it so the water clears AFTER the camera settles
+  // below the surface, then eases in (held instant under prefers-reduced-motion).
+  const murkStyle: CSSProperties = {
+    opacity: clearWater ? 0.32 : 1,
+    transition: reducedMotion ? 'none' : 'opacity 1400ms cubic-bezier(0.4,0,0.2,1)',
+    transitionDelay: reducedMotion || !clearWater ? '0ms' : '1200ms',
+  }
   return (
     <g aria-hidden="true">
       {/* the underwater hull, seen through green-tinted water — wavy top edge laps the hull and
-          rolls sideways with the surface */}
-      <path d={VEIL_FILL} fill="url(#waterVeil)">
-        <Drift reducedMotion={reducedMotion} />
-      </path>
+          rolls sideways with the surface. Thins out in Act 2 (clearWater) so the fouling shows. */}
+      <g style={murkStyle}>
+        <path d={VEIL_FILL} fill="url(#waterVeil)">
+          <Drift reducedMotion={reducedMotion} />
+        </path>
+      </g>
 
       {/* the scattering band + meniscus follow the wavy waterline and drift sideways in step with
           the open water behind, so the line lapping the hull rolls the same way. */}
