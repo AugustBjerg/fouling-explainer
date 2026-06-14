@@ -207,32 +207,46 @@ a {
 }
 
 /* ----------------------------------------------------------- act 1 scrollytelling -- */
-/* The ship is fixed (behind, in the bottom zone); scrolling this container swaps the intro
-   copy through six beats in the top "sky zone". See docs/act1-design-spec.md + Act1Problem.tsx.
-   The container scrolls; a sticky stage pins the copy + scroll cue while invisible per-beat
-   sentinels supply the scroll length and drive the active beat via IntersectionObserver. */
+/* The ship is fixed (behind, in the bottom zone); the intro copy steps through six beats in the
+   top "sky zone". See docs/act1-design-spec.md + Act1Problem.tsx. NATIVE scroll + CSS snap: the
+   user scrolls freely (a fast flick crosses several beats) and the browser glides smoothly to
+   the nearest beat when momentum ends. A sticky stage pins the copy + cue while empty per-beat
+   snap panels supply the scroll length and the snap points. */
 .act1 {
   position: absolute;
   inset: 0;
   z-index: 4;
   overflow-y: auto;
   overflow-x: hidden;
+  scroll-snap-type: y mandatory; /* always lands on a beat when the scroll ends */
   scrollbar-width: none; /* the scroll cue signals scrollability; hide the raw bar */
 }
 .act1::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
-.act1__inner {
-  position: relative; /* height is set inline = BEATS.length * 100svh (the scroll length) */
+.act1:focus,
+.act1:focus-visible {
+  outline: none; /* the active beat is the visible state; no full-bleed focus ring */
 }
 
-/* Pinned stage: spans one viewport, holds the copy (sky zone) and the scroll cue (waterline). */
+/* Stage: pinned across the whole scroll, holds the copy (sky zone) and the cue (waterline). The
+   negative margin cancels its own flow height so the snap panels alone define the scroll length. */
 .act1__stage {
   position: sticky;
   top: 0;
+  z-index: 1;
   height: 100svh;
-  pointer-events: none; /* scroll/touch fall through; only the active beat re-enables itself */
+  margin-bottom: -100svh;
+  pointer-events: none; /* only the active beat re-enables itself, for the CTA */
+}
+
+/* Empty full-viewport panels: one per beat. Each is a snap point; together they are the scroll
+   length. scroll-snap-stop stays 'normal' so a fast flick can cross several beats at once. */
+.act1__snap {
+  height: 100svh;
+  scroll-snap-align: start;
+  pointer-events: none;
 }
 
 /* Copy lives top-left in the sky zone — no card; a dark text-shadow carries contrast over the
@@ -243,12 +257,15 @@ a {
 }
 .act1__beat {
   position: absolute;
-  top: clamp(var(--space-xl), 9vh, 96px);
-  left: clamp(var(--space-lg), 6vw, var(--space-xxl));
-  right: clamp(var(--space-lg), 6vw, var(--space-xxl));
+  top: clamp(var(--space-xl), 12vh, 132px);
+  left: var(--space-lg);
+  right: var(--space-lg);
+  margin-inline: auto; /* with left/right gutters + max-width, this centres the block */
   max-width: var(--text-max-width);
+  text-align: center;
   display: flex;
   flex-direction: column;
+  align-items: center; /* centre the eyebrow / CTA too */
   gap: var(--space-md);
   pointer-events: none;
   /* opacity + transform are driven inline per scroll frame (Act1Problem.tsx) for a continuous
@@ -280,23 +297,25 @@ a {
   color: var(--color-text-primary);
   text-shadow: 0 2px 18px rgba(5, 12, 14, 0.82), 0 1px 3px rgba(5, 12, 14, 0.65);
 }
-.act1__body strong {
+/* Emphasised words + figures: bold and coloured (not italic), high-contrast accent. */
+.act1__body strong,
+.act1__transition strong {
   font-weight: 700;
-}
-.act1__body em {
-  font-style: italic;
-  color: var(--color-glow-teal);
+  color: var(--color-glow-teal-bright);
 }
 .act1__cta {
-  align-self: flex-start;
-  margin-top: var(--space-sm);
+  align-self: center;
+  margin-top: var(--space-md);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-h2);
+  font-weight: 500;
   pointer-events: auto;
 }
 
 /* Scroll cue: subtle, just below the waterline. Fades out after the first scroll step. */
 .act1__cue {
   position: absolute;
-  top: 62%;
+  top: 42%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -336,7 +355,10 @@ a {
   }
 }
 
-/* Reduced-motion fallback: a plain stacked, scrollable list of all beats (no pin, no fades). */
+/* Reduced-motion fallback: a plain stacked, scrollable list of all beats (no pin, no snap). */
+.act1--static {
+  scroll-snap-type: none;
+}
 .act1--static .act1__static-copy {
   position: relative;
   min-height: 100%;

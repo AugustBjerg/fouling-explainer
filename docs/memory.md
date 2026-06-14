@@ -8,11 +8,16 @@ change; date every entry. Newest at top.
 ## 2026-06-13 — Act 1 is scrollytelling; no global control bar
 
 - **Act 1 is now scroll-driven** (per `docs/act1-design-spec.md`), not click-stepped. The ship
-  stays fixed + clean in the bottom zone; scrolling swaps the intro copy through six beats in
-  the top "sky zone", ending on a **"Dive deeper"** CTA into Act 2. Built in `Act1Problem.tsx`
-  with a sticky stage + per-beat sentinels + IntersectionObserver (centre trip-line); reduced
-  motion falls back to a plain stacked list. **This partially supersedes** the kickoff
-  "Click/Next stepped, not scroll-driven" rule — that rule still holds for Acts 2↔3.
+  stays fixed + clean in the bottom zone; scrolling steps the centred intro copy through five
+  beats in the top "sky zone", ending on a **"Dive deeper ↓"** CTA into Act 2. Built in
+  `Act1Problem.tsx` with **native scroll + CSS `scroll-snap-type: y mandatory`** (a sticky stage
+  pins the copy; empty per-beat snap panels supply the scroll length + snap points; a scroll
+  listener reads `progress` for the cross-fade). We tried JS-debounced snap and a custom eased
+  input-capture engine first; both felt wrong (snap delay / could not multi-step / needed a
+  click to re-arm). Native scroll-snap gives free continuous scroll, multi-beat fast flicks, and
+  a smooth native landing. Reduced motion falls back to a plain stacked list (snap off). **This
+  partially supersedes** the kickoff "Click/Next stepped, not scroll-driven" rule — that rule
+  still holds for Acts 2↔3.
 - **The bottom control bar is removed everywhere** (it read as a black bar). Wayfinding is now
   each act's own in-act CTA: Act 1 "Dive deeper", Act 2 a `.act__nav` row (Back / "What this
   means"), Act 3 placeholder a "Back" link. Arrow keys still step between Acts 2↔3 (and back to
