@@ -32,6 +32,7 @@ export const vessel = {
   maxEnginePowerKw: 9_500,
   dataYear: 2024,
   cleanedObservations: 15_061,
+  avgSpeedKnots: 11, // the speed the added-power estimate is anchored to (it varies with speed)
 } as const
 
 // ---------------------------------------------------------------------------------------
@@ -51,7 +52,7 @@ export const money = {
   cumulativeExtraFuelUsd: { mlp: 91_000, gam: 106_000 }, // over the ~6-month period
   // TODO(assumption): these drive fuelCostPerDayUsd(); confirm the basis with August.
   cleanFuelBurnTonnesPerDay: 22, // a Panamax bulk carrier's clean main-engine burn (est.)
-  fuelPriceUsdPerTonne: 600, // VLSFO price assumption (est.)
+  fuelPriceUsdPerTonne: 626, // VLSFO, Global 4 ports 2024 average (confirmed by August)
 } as const
 
 // ---------------------------------------------------------------------------------------
@@ -152,6 +153,24 @@ export function addedPowerKw(days: number): number {
 export function fuelCostPerDayUsd(days: number): number {
   return lookup(days, 'addedFuelCostUsdPerDay')
 }
+
+// ---------------------------------------------------------------------------------------
+// Readout footnotes — the bullet text shown in the hover "info" boxes next to each Act 2
+// readout (the assumptions + method behind each figure). Numbers reference the constants
+// above so each one still has a single home.
+// ---------------------------------------------------------------------------------------
+export const readoutNotes = {
+  fuelCost: [
+    `For a ${vessel.deadweightTonnes.toLocaleString('en-US')} deadweight tonnage Panamax bulk carrier`,
+    `Assuming a fuel price of ${money.fuelPriceUsdPerTonne} USD/ton (VLSFO, Global 4 ports 2024 average)`,
+    'Assuming 24h operation',
+  ],
+  energyConsumption: [
+    'Measured as power in the propeller shaft',
+    'Estimated using a neural network and accumulated local effects',
+    `Varies with speed. Estimate based on average speed of ~${vessel.avgSpeedKnots} knots`,
+  ],
+} as const
 
 // ---------------------------------------------------------------------------------------
 // Fouling stage label (docs/design.md → Fouling stages → what's on screen).

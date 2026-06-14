@@ -1,6 +1,6 @@
 // The Act 2 centerpiece control. Maps a range input to daysSinceCleaning (0..180). As the
 // visitor drags, the parent re-derives the hull + readouts — this component just owns the
-// input and its accessible labelling. Marks the ~day-75 "barnacles start" point and day 180.
+// input and its accessible labelling.
 //
 // PERFORMANCE: the thumb is mirrored in local state so it tracks the pointer instantly, while
 // the parent (which re-fouls the whole hull) is notified at most once per animation frame. That
@@ -12,8 +12,6 @@ interface FoulingSliderProps {
   days: number
   onChange: (days: number) => void
 }
-
-const BARNACLE_DAY = 75 // when added power starts to spike (docs/content.md)
 
 export default function FoulingSlider({ days, onChange }: FoulingSliderProps) {
   const [value, setValue] = useState(days)
@@ -45,8 +43,6 @@ export default function FoulingSlider({ days, onChange }: FoulingSliderProps) {
     }
   }
 
-  const pct = (d: number) => ((d - DAYS.min) / (DAYS.max - DAYS.min)) * 100
-
   return (
     <div className="fouling-control">
       <label className="fouling-control__label" htmlFor="fouling-slider">
@@ -66,15 +62,6 @@ export default function FoulingSlider({ days, onChange }: FoulingSliderProps) {
           addedPowerPct(value),
         )} percent added power`}
       />
-      {/* track markers for the two storytelling moments */}
-      <div className="fouling-control__ticks" aria-hidden="true">
-        <span className="fouling-control__tick" style={{ left: `${pct(BARNACLE_DAY)}%` }}>
-          ~day {BARNACLE_DAY}: barnacles start
-        </span>
-        <span className="fouling-control__tick" style={{ left: `${pct(DAYS.max)}%` }}>
-          day {DAYS.max}
-        </span>
-      </div>
     </div>
   )
 }

@@ -242,6 +242,83 @@ a {
   text-shadow: 0 1px 14px rgba(5, 12, 14, 0.95);
 }
 
+/* --------------------------------------------------------------------------- info tip -- */
+/* A small ⓘ badge + hover/focus popover. Re-enables pointer events over the .act2 layer
+   (which disables them), and resets the big readout's font/whitespace inside the popover. */
+.infotip {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.4em;
+  pointer-events: auto;
+}
+.infotip__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  border-radius: 50%;
+  border: 1px solid var(--color-text-muted);
+  background: var(--color-deep-water-raised);
+  color: var(--color-text-muted);
+  text-shadow: none;
+  transition: color var(--motion-fouling) var(--ease), border-color var(--motion-fouling) var(--ease);
+}
+.infotip:hover .infotip__button,
+.infotip:focus-within .infotip__button {
+  color: var(--color-text-primary);
+  border-color: var(--color-glow-teal);
+}
+.infotip__box {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 6;
+  width: max-content;
+  max-width: min(280px, 78vw);
+  padding: var(--space-md);
+  border-radius: 10px;
+  border: 1px solid rgba(94, 140, 130, 0.35);
+  background: rgba(10, 26, 28, 0.97);
+  box-shadow: 0 8px 30px rgba(5, 12, 14, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--motion-fouling) var(--ease),
+    transform var(--motion-fouling) var(--ease),
+    visibility var(--motion-fouling) var(--ease);
+}
+.infotip:hover .infotip__box,
+.infotip:focus-within .infotip__box {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.infotip__list {
+  margin: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  list-style: disc;
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+  line-height: var(--line-height-body);
+  color: var(--color-text-primary);
+  text-align: left;
+  text-shadow: none;
+  white-space: normal;
+}
+
 /* Controls anchored at the bottom, in the water, on a soft scrim for legibility. */
 .act2__controls {
   flex: 0 0 auto;
@@ -519,9 +596,10 @@ a {
 .fouling-control__label {
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
+  text-align: center;
 }
 .fouling-control__value {
-  color: var(--color-text-primary);
+  color: var(--color-signal-rust);
   font-weight: 500;
 }
 .fouling-slider {
@@ -643,6 +721,7 @@ a {
 .act__nav {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-md);
   margin-top: var(--space-lg);
 }

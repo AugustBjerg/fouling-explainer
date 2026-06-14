@@ -8,7 +8,8 @@
 // + sign (signDisplay handles the rare zero/negative cleanly).
 import type { CSSProperties } from 'react'
 import FoulingSlider from '../controls/FoulingSlider'
-import { addedPowerPct, fuelCostPerDayUsd, foulingLevel } from '../../data/findings'
+import InfoTip from '../ui/InfoTip'
+import { addedPowerPct, fuelCostPerDayUsd, foulingLevel, readoutNotes } from '../../data/findings'
 import { useTweenedNumber } from '../../hooks/useTweenedNumber'
 
 interface Act2FindingsProps {
@@ -38,6 +39,7 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
           <div className="act2__value">
             {signed.format(Math.round(fuelCost))}
             <span className="act2__unit">USD/day</span>
+            <InfoTip label="About the added fuel cost" bullets={readoutNotes.fuelCost} />
           </div>
           <div className="act2__caption">additional fuel cost</div>
         </div>
@@ -46,7 +48,13 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
             {signed.format(Math.round(energyPct))}
             <span className="act2__unit">%</span>
           </div>
-          <div className="act2__caption">additional energy consumption</div>
+          <div className="act2__caption">
+            additional energy consumption
+            <InfoTip
+              label="About the added energy consumption"
+              bullets={readoutNotes.energyConsumption}
+            />
+          </div>
         </div>
       </div>
 
@@ -59,7 +67,7 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
               ← Back
             </button>
             <button type="button" className="cta-link" onClick={onNext}>
-              What this means →
+              So what? →
             </button>
           </div>
         </div>
