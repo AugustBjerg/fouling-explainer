@@ -196,9 +196,160 @@ a {
   inset: 0;
   z-index: 4;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
+  justify-content: space-between;
   padding: var(--space-lg);
   pointer-events: none;
+}
+.act-placeholder__back {
+  pointer-events: auto; /* parent is click-through; the nav button is not */
+}
+
+/* ----------------------------------------------------------- act 1 scrollytelling -- */
+/* The ship is fixed (behind, in the bottom zone); scrolling this container swaps the intro
+   copy through six beats in the top "sky zone". See docs/act1-design-spec.md + Act1Problem.tsx.
+   The container scrolls; a sticky stage pins the copy + scroll cue while invisible per-beat
+   sentinels supply the scroll length and drive the active beat via IntersectionObserver. */
+.act1 {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* the scroll cue signals scrollability; hide the raw bar */
+}
+.act1::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.act1__inner {
+  position: relative; /* height is set inline = BEATS.length * 100svh (the scroll length) */
+}
+
+/* Pinned stage: spans one viewport, holds the copy (sky zone) and the scroll cue (waterline). */
+.act1__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  pointer-events: none; /* scroll/touch fall through; only the active beat re-enables itself */
+}
+
+/* Copy lives top-left in the sky zone — no card; a dark text-shadow carries contrast over the
+   light overcast sky. Beats stack in the same spot and cross-fade on scroll. */
+.act1__copy {
+  position: absolute;
+  inset: 0;
+}
+.act1__beat {
+  position: absolute;
+  top: clamp(var(--space-xl), 9vh, 96px);
+  left: clamp(var(--space-lg), 6vw, var(--space-xxl));
+  right: clamp(var(--space-lg), 6vw, var(--space-xxl));
+  max-width: var(--text-max-width);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  pointer-events: none;
+  /* opacity + transform are driven inline per scroll frame (Act1Problem.tsx) for a continuous
+     cross-fade, so no CSS transition here. */
+  will-change: opacity, transform;
+}
+.act1__beat.is-active {
+  pointer-events: auto; /* so the "Dive deeper" button is clickable */
+}
+.act1__eyebrow {
+  font-size: var(--font-size-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  opacity: 0.82;
+  text-shadow: 0 1px 12px rgba(5, 12, 14, 0.6);
+}
+.act1__headline {
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 22px rgba(5, 12, 14, 0.85), 0 1px 3px rgba(5, 12, 14, 0.7);
+}
+.act1__body,
+.act1__transition {
+  font-size: var(--font-size-h2);
+  line-height: 1.45;
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 18px rgba(5, 12, 14, 0.82), 0 1px 3px rgba(5, 12, 14, 0.65);
+}
+.act1__body strong {
+  font-weight: 700;
+}
+.act1__body em {
+  font-style: italic;
+  color: var(--color-glow-teal);
+}
+.act1__cta {
+  align-self: flex-start;
+  margin-top: var(--space-sm);
+  pointer-events: auto;
+}
+
+/* Scroll cue: subtle, just below the waterline. Fades out after the first scroll step. */
+.act1__cue {
+  position: absolute;
+  top: 62%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-text-primary);
+  opacity: 0.7;
+  transition: opacity 400ms var(--ease);
+}
+.act1__cue.is-hidden {
+  opacity: 0;
+}
+.act1__cue-label {
+  font-size: var(--font-size-caption);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(5, 12, 14, 0.6);
+}
+.act1__cue-chevron {
+  width: 11px;
+  height: 11px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  animation: act1-bob 1.8s var(--ease) infinite;
+}
+@keyframes act1-bob {
+  0%,
+  100% {
+    transform: rotate(45deg) translate(0, 0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: rotate(45deg) translate(2px, 2px);
+    opacity: 1;
+  }
+}
+
+/* Reduced-motion fallback: a plain stacked, scrollable list of all beats (no pin, no fades). */
+.act1--static .act1__static-copy {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  padding: clamp(var(--space-lg), 6vw, var(--space-xxl));
+}
+.act1--static .act1__beat {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+  max-width: var(--text-max-width);
 }
 .act-placeholder__tag {
   font-size: var(--font-size-caption);
@@ -391,6 +542,19 @@ a {
   background: var(--color-glow-teal-soft);
   color: var(--color-text-primary);
   text-decoration: none;
+}
+/* Quieter secondary CTA (e.g. "Back") — no fill, dimmer border. */
+.cta-link--ghost {
+  border-color: rgba(94, 140, 130, 0.35);
+  background: transparent;
+}
+
+/* In-act forward/back nav, used where there is no global control bar (Acts 2 & 3). */
+.act__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
 }
 
 /* --------------------------------------------------------------- reduced-motion guard -- */

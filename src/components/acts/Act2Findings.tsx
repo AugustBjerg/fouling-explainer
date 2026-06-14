@@ -12,9 +12,13 @@ interface Act2FindingsProps {
   days: number
   onDaysChange: (days: number) => void
   reducedMotion?: boolean
+  /** Step back to Act 1 (no bottom control bar — each act carries its own nav). */
+  onBack: () => void
+  /** Advance to Act 3. */
+  onNext: () => void
 }
 
-export default function Act2Findings({ days, onDaysChange, reducedMotion }: Act2FindingsProps) {
+export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack, onNext }: Act2FindingsProps) {
   return (
     <section className="act" aria-labelledby="act2-title">
       <p className="act__eyebrow">The findings</p>
@@ -53,6 +57,15 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion }: Act2
       <p className="act__transition">
         One ship, one year. Treat the shape and scale as the finding — not the decimal places.
       </p>
+
+      <div className="act__nav">
+        <button type="button" className="cta-link cta-link--ghost" onClick={onBack}>
+          ← Back
+        </button>
+        <button type="button" className="cta-link" onClick={onNext}>
+          What this means →
+        </button>
+      </div>
     </section>
   )
 }

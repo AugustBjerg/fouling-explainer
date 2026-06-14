@@ -5,6 +5,25 @@ change; date every entry. Newest at top.
 
 ---
 
+## 2026-06-13 — Act 1 is scrollytelling; no global control bar
+
+- **Act 1 is now scroll-driven** (per `docs/act1-design-spec.md`), not click-stepped. The ship
+  stays fixed + clean in the bottom zone; scrolling swaps the intro copy through six beats in
+  the top "sky zone", ending on a **"Dive deeper"** CTA into Act 2. Built in `Act1Problem.tsx`
+  with a sticky stage + per-beat sentinels + IntersectionObserver (centre trip-line); reduced
+  motion falls back to a plain stacked list. **This partially supersedes** the kickoff
+  "Click/Next stepped, not scroll-driven" rule — that rule still holds for Acts 2↔3.
+- **The bottom control bar is removed everywhere** (it read as a black bar). Wayfinding is now
+  each act's own in-act CTA: Act 1 "Dive deeper", Act 2 a `.act__nav` row (Back / "What this
+  means"), Act 3 placeholder a "Back" link. Arrow keys still step between Acts 2↔3 (and back to
+  1). `StepNav.tsx` / `StepIndicator.tsx` are now unused but left in the tree in case nav
+  returns.
+- **Act 1 ship pulled back to ~25% of screen width** (`ACT1_SURFACE_ZOOM = 0.25` in `acts.ts`,
+  separate from Act 3's `ACT_SURFACE_ZOOM = 0.42`) and dropped low (`ACT1_SHIP_DROP = 18%`) to
+  clear the sky-zone copy. Both are tunable knobs.
+
+---
+
 ## 2026-06-12 — Act 2 dives underwater
 
 - The Act 1→2 transition now **drops below the surface and zooms in** (not a flat sideways
