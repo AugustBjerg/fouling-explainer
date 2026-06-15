@@ -46,7 +46,7 @@ export default function FoulingSlider({ days, onChange }: FoulingSliderProps) {
   return (
     <div className="fouling-control">
       <label className="fouling-control__label" htmlFor="fouling-slider">
-        Days since the hull was cleaned:{' '}
+        Days since hull cleaning:{' '}
         <span className="fouling-control__value">{Math.round(value)}</span>
       </label>
       <input

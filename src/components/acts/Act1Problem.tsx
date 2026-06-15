@@ -22,19 +22,19 @@ interface Beat {
 
 // The transition line that leads into the Dive-deeper button (docs/content.md).
 const TRANSITION =
-  'Recent improvements in availability and quality of ship data have opened the door to machine learning as an alternative. Therefore, I used Explainable Artifical Intelligence to quantify the impact of biofouling on a real vessel at sea.'
+  'Recent improvements in availability and quality of ship data have opened the door to new data-driven approaches. Therefore, I tested the ability of Explainable Artificial Intelligence to quantify the impact of biofouling on a vessel at sea, using only its operational data.'
 
 const BEATS: Beat[] = [
   {
     kind: 'headline',
-    text: 'The ocean is slowly eating fuel budgets...',
+    text: 'The ocean is slowly eating fuel budgets in the shipping industry',
   },
   {
     kind: 'body',
     text: (
       <>
-        Below the waterline, marine life grows on the hull: first slime, then algae, then
-        barnacles. This is <strong>biofouling</strong>. It makes a ship less hydrodynamic, forcing the engine to
+        Below the waterline, marine life grows on the outside of ships: first slime, then algae, then
+        mussels and barnacles. This is <strong>biofouling</strong>. It makes a ship less hydrodynamic, forcing the engine to
         burn more fuel to hold the same speed.
       </>
     ),
@@ -53,7 +53,7 @@ const BEATS: Beat[] = [
     kind: 'body',
     text: (
       <>
-        Fouling is difficult to detect while the ship is at sea, so it has to be inferred from data. This is typically done using standardized methods such as ISO19030. While grounded in naval engineering, these methods are one-size-fits-all and often inaccurate.
+        Fouling is difficult to detect while the ship is at sea, so it has to be inferred from data, typically using standardized methods such as ISO19030. While grounded in naval engineering, these methods are one-size-fits-all and often inaccurate.
       </>
     ),
   },

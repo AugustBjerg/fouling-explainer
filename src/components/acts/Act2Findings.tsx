@@ -41,7 +41,7 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
             <span className="act2__unit">USD/day</span>
           </div>
           <div className="act2__caption">
-            additional fuel cost
+            Additional fuel cost
             <InfoTip label="About the added fuel cost" bullets={readoutNotes.fuelCost} />
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
             <span className="act2__unit">%</span>
           </div>
           <div className="act2__caption">
-            additional energy consumption
+            Additional energy consumption
             <InfoTip
               label="About the added energy consumption"
               bullets={readoutNotes.energyConsumption}
@@ -66,10 +66,10 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
           <FoulingSlider days={days} onChange={onDaysChange} />
           <div className="act__nav">
             <button type="button" className="cta-link cta-link--ghost" onClick={onBack}>
-              ← Back
+              Back
             </button>
             <button type="button" className="cta-link" onClick={onNext}>
-              So what? →
+              So what?
             </button>
           </div>
         </div>

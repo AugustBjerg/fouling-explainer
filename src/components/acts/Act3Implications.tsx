@@ -25,15 +25,15 @@ interface Beat {
 const BEATS: Beat[] = [
   {
     kind: 'headline',
-    text: 'Machine learning shows promise as a new way to quantify fouling.',
+    text: 'Machine learning shows promise as a new way to quantify fouling',
   },
   {
     kind: 'body',
     text: (
       <>
-        Get the implementation right, and it could save the shipping industry{' '}
-        <strong>billions of dollars</strong> — and the world{' '}
-        <strong>millions of tonnes of greenhouse-gas emissions</strong> — every year.
+        If implemented right, it could save the shipping industry{' '}
+        <strong>billions of dollars</strong>, and the world{' '}
+        <strong>millions of tonnes of greenhouse-gas emissions</strong>, every year.
       </>
     ),
   },
@@ -47,10 +47,10 @@ function BeatContent({ beat }: { beat: Beat }) {
         <p className="scrolly__body">Dive deeper into the findings, or check out the code.</p>
         <div className="cta-links">
           <a className="cta-link" href={THESIS_PDF_URL} target="_blank" rel="noopener noreferrer">
-            Read the full thesis →
+            Read the full thesis (PDF)
           </a>
           <a className="cta-link" href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-            View the code on GitHub →
+            View the code on GitHub
           </a>
         </div>
       </>
@@ -73,7 +73,7 @@ export default function Act3Implications({ onBack, reducedMotion }: Act3Implicat
         renderBeat={(i) => <BeatContent beat={BEATS[i]} />}
       />
       <button type="button" className="cta-link cta-link--ghost scrolly__back-link" onClick={onBack}>
-        ← Back
+        Back
       </button>
     </>
   )
