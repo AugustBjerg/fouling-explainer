@@ -60,6 +60,11 @@ export const money = {
 // ---------------------------------------------------------------------------------------
 export const DAYS = { min: 0, max: 180 } as const
 
+// The headline added-energy-consumption figure: power demand peaks at +36% by day 180.
+// The raw MLP percentages in the CSV top out a little below this, so the addedPowerPct column
+// is scaled on load so its peak lands exactly here (the CSV stays untouched as the true record).
+export const ADDED_POWER_PEAK_PCT = 36
+
 // ---------------------------------------------------------------------------------------
 // Real per-day figures (the Act 2 readouts). These are the ACTUAL MLP-model results from the
 // thesis, loaded from src/data/mlp_fouling_fuel_table.csv — not estimates. The raw curve dips
@@ -89,7 +94,7 @@ function parseFoulingTable(csv: string): FoulingDatum[] {
   // between the nearest non-negative days around it.
   const cost = fillNegatives(rows.map((r) => r[1]))
   const kw = fillNegatives(rows.map((r) => r[2]))
-  const pct = fillNegatives(rows.map((r) => r[3]))
+  const pct = fillNegatives(scaleToPeak(rows.map((r) => r[3]), ADDED_POWER_PEAK_PCT))
 
   return rows.map((r, i) => ({
     day: r[0],
@@ -97,6 +102,15 @@ function parseFoulingTable(csv: string): FoulingDatum[] {
     addedPowerKw: kw[i],
     addedPowerPct: pct[i],
   }))
+}
+
+/** Scales a series proportionally so its maximum value equals `peak` (keeps the curve's shape,
+ *  just stretches it to the headline figure). No-op if the series never goes positive. */
+function scaleToPeak(values: number[], peak: number): number[] {
+  const max = Math.max(...values)
+  if (max <= 0) return values
+  const factor = peak / max
+  return values.map((v) => v * factor)
 }
 
 /** Replaces each run of negative values with a straight line between the nearest non-negative
