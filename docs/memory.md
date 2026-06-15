@@ -5,6 +5,27 @@ change; date every entry. Newest at top.
 
 ---
 
+## 2026-06-15 — Act 3 built as scrollytelling mirroring Act 1
+
+- **Act 3 is now real** (replaces the placeholder) and is **scroll-driven like Act 1**, not
+  static takeaways. The scrollytelling shell was **extracted from `Act1Problem.tsx` into a shared
+  `Scrolly.tsx`** (owns the native-scroll + CSS-snap motion, the sticky stage, cross-fade, cue,
+  snap panels, and reduced-motion fallback); Act 1 and Act 3 now both just supply beats via a
+  `renderBeat` prop. CSS for the shell was renamed `.act1*` → `.scrolly*`.
+- **Act 3 framing now MATCHES Act 1** (August's request: "same perspective as Act 1, other end").
+  Both use one shared `ACT_SURFACE_ZOOM = 0.25` + `ACT_SHIP_DROP = 18%`; Act 1 frames the **stern**
+  third (`translateX(100%)`), Act 3 the **bow** third (`translateX(-100%)`). This **supersedes**
+  the 2026-06-13 note that Act 3 had its own `ACT_SURFACE_ZOOM = 0.42` (that constant is gone).
+- **Three beats** (copy in `content.md`): (1) ML shows promise as a new way to quantify fouling;
+  (2) get it right → saves the industry billions + the world millions of tonnes of GHG/yr;
+  (3) closing CTA with the two links. A quiet **persistent Back** (top-left) returns to Act 2.
+- **Links resolved.** GitHub repo = `https://github.com/AugustBjerg/Master-s-thesis`. Thesis PDF
+  is **self-hosted**: button points to `/thesis.pdf`; **August must drop the PDF into `public/`
+  as `thesis.pdf`** (not yet committed).
+- **`ActPlaceholder.tsx` deleted** (its only use was Act 3) along with its `.act-placeholder*` CSS.
+
+---
+
 ## 2026-06-13 — Act 1 is scrollytelling; no global control bar
 
 - **Act 1 is now scroll-driven** (per `docs/act1-design-spec.md`), not click-stepped. The ship
@@ -145,8 +166,9 @@ change; date every entry. Newest at top.
 - [ ] **Hosting undecided.** August wants a conversation comparing options (GitHub Pages =
   free but public repo; Vercel = private repo + public site, auto-deploy; etc.) before launch.
   Files are written host-agnostic until then.
-- [ ] **`<THESIS_PDF_URL>`** — August to provide the link to the full thesis.
-- [ ] **`<GITHUB_REPO_URL>`** — set once the repo is created/pushed.
+- [x] **`<THESIS_PDF_URL>`** — decided 2026-06-15: **self-hosted at `/thesis.pdf`**. Still need
+  August to drop the actual PDF into `public/thesis.pdf`.
+- [x] **`<GITHUB_REPO_URL>`** — set 2026-06-15: `https://github.com/AugustBjerg/Master-s-thesis`.
 - [ ] **Build the Vite app** — `src/` scaffold does not exist yet; these docs are the spec
   for the build agent.
 - [ ] **UI UX Pro Max skill** — recommended but not yet installed; optional accelerator for

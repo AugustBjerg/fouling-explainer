@@ -4,8 +4,8 @@
 //   daysSinceCleaning — 0..180, the Act 2 control; persists across acts
 //   prefersReducedMotion — from the OS
 //
-// There is no bottom control bar: each act hands off via its own in-act CTA (Act 1's "Dive
-// deeper", Act 2's "What this means"). Arrow keys still step between acts for keyboard users.
+// There is no bottom control bar: each act carries its own in-act nav (Act 1's hand-off CTA,
+// Act 2's Back/forward, Act 3's Back + closing links). Arrow keys still step between acts.
 import { useEffect, useState } from 'react'
 import { ACTS, HULL_FRAMING, act2DiveTransform, type ActNumber } from './acts'
 import { motion } from './theme'
@@ -13,7 +13,7 @@ import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion'
 import Hull from './components/hull/Hull'
 import Act1Problem from './components/acts/Act1Problem'
 import Act2Findings from './components/acts/Act2Findings'
-import ActPlaceholder from './components/acts/ActPlaceholder'
+import Act3Implications from './components/acts/Act3Implications'
 
 // A handful of slow ambient particles (positions/timing fixed so they don't reshuffle).
 const PARTICLES = [
@@ -46,8 +46,8 @@ export default function App() {
   const goBack = () => setCurrentAct((a) => Math.max(1, a - 1) as ActNumber)
 
   // Keyboard wayfinding (the visible nav is each act's own CTA). → / ← step between acts.
-  // Skip Act 1 for →: there, scrolling drives the beats and "Dive deeper" advances. Ignore
-  // keys while a form control (the Act 2 slider) is focused so arrows still scrub it.
+  // Skip Act 1 for →: there (and in Act 3) scrolling drives the beats and the in-act CTA advances.
+  // Ignore keys while a form control (the Act 2 slider) is focused so arrows still scrub it.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.target as HTMLElement | null)?.tagName === 'INPUT') return
@@ -109,7 +109,7 @@ export default function App() {
           />
         )}
         {currentAct === 3 && (
-          <ActPlaceholder label="Act 3 · Implications" onBack={goBack} />
+          <Act3Implications onBack={goBack} reducedMotion={prefersReducedMotion} />
         )}
       </div>
     </div>

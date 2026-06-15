@@ -83,16 +83,17 @@ The slider is the whole story — no plotted chart, no quoted percentages.
 
 ## Act 3 — The implications
 
-**Goal:** land three takeaways and offer the two links.
+**Goal:** land the takeaway and offer the two links.
 
-- Hull glides to the stern, shown **clean again** (the "after cleaning" payoff).
-- Three takeaways from `content.md` (condition-based cleaning; ML as a look-back tool;
-  trust beats complexity) — short, confident, one line each.
-- Closing line.
-- **Two CTA links**, each `target="_blank" rel="noopener noreferrer"`:
-  - **Read the full thesis** → `<THESIS_PDF_URL>`
-  - **View the code on GitHub** → `<GITHUB_REPO_URL>`
-- **Back** → Act 2. (Optional: a "start over" → Act 1.)
+- **Scrollytelling, mirroring Act 1** (shared `Scrolly.tsx` shell). The hull glides to the **bow**,
+  shown **clean again** (the "after cleaning" payoff), at the **same framing as Act 1** (same
+  zoom + low drop, just the opposite end of the ship). Copy steps through the top "sky zone".
+- **Three beats** from `content.md`: (1) ML shows promise as a new way to quantify fouling;
+  (2) the prize if you nail it (industry billions + world GHG); (3) the closing CTA.
+- The closing beat carries **two CTA links**, each `target="_blank" rel="noopener noreferrer"`:
+  - **Read the full thesis** → `/thesis.pdf` (self-hosted in `public/`)
+  - **View the code on GitHub** → `https://github.com/AugustBjerg/Master-s-thesis`
+- A quiet **Back** (top-left) → Act 2. Reduced motion falls back to a plain stacked list.
 
 ---
 
@@ -100,9 +101,10 @@ The slider is the whole story — no plotted chart, no quoted percentages.
 
 ```
 acts/
-  Act1Problem.tsx        // problem copy + context StatCards
+  Scrolly.tsx            // shared scrollytelling shell (native scroll + CSS snap); used by Acts 1 & 3
+  Act1Problem.tsx        // problem beats (via Scrolly) → "Dive deeper" hand-off
   Act2Findings.tsx       // hosts FoulingSlider + counters + supporting cards
-  Act3Implications.tsx   // takeaways + the two CTA links
+  Act3Implications.tsx   // implication beats (via Scrolly) + the two CTA links + Back
 hull/
   Hull.tsx               // SVG ship profile; receives foulingLevel + derived vars
   SlimeLayer.tsx         // opacity = slimeOpacity

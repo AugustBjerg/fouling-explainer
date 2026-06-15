@@ -334,30 +334,14 @@ a {
   gap: var(--space-md);
 }
 
-/* ----------------------------------------------------------------- act placeholders -- */
-/* No scrim, no copy — just a small tag so the hull behind stays fully visible. */
-.act-placeholder {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: var(--space-lg);
-  pointer-events: none;
-}
-.act-placeholder__back {
-  pointer-events: auto; /* parent is click-through; the nav button is not */
-}
-
-/* ----------------------------------------------------------- act 1 scrollytelling -- */
-/* The ship is fixed (behind, in the bottom zone); the intro copy steps through six beats in the
-   top "sky zone". See docs/act1-design-spec.md + Act1Problem.tsx. NATIVE scroll + CSS snap: the
-   user scrolls freely (a fast flick crosses several beats) and the browser glides smoothly to
-   the nearest beat when momentum ends. A sticky stage pins the copy + cue while empty per-beat
-   snap panels supply the scroll length and the snap points. */
-.act1 {
+/* ----------------------------------------------------------- scrollytelling (acts 1 & 3) -- */
+/* Shared shell for the two surface acts (see Scrolly.tsx, used by Act1Problem + Act3Implications;
+   design in docs/act1-design-spec.md). The ship is fixed (behind, in the bottom zone); the copy
+   steps through beats in the top "sky zone". NATIVE scroll + CSS snap: the user scrolls freely (a
+   fast flick crosses several beats) and the browser glides smoothly to the nearest beat when
+   momentum ends. A sticky stage pins the copy + cue while empty per-beat snap panels supply the
+   scroll length and the snap points. */
+.scrolly {
   position: absolute;
   inset: 0;
   z-index: 4;
@@ -366,18 +350,18 @@ a {
   scroll-snap-type: y mandatory; /* always lands on a beat when the scroll ends */
   scrollbar-width: none; /* the scroll cue signals scrollability; hide the raw bar */
 }
-.act1::-webkit-scrollbar {
+.scrolly::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
-.act1:focus,
-.act1:focus-visible {
+.scrolly:focus,
+.scrolly:focus-visible {
   outline: none; /* the active beat is the visible state; no full-bleed focus ring */
 }
 
 /* Stage: pinned across the whole scroll, holds the copy (sky zone) and the cue (waterline). The
    negative margin cancels its own flow height so the snap panels alone define the scroll length. */
-.act1__stage {
+.scrolly__stage {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -388,7 +372,7 @@ a {
 
 /* Empty full-viewport panels: one per beat. Each is a snap point; together they are the scroll
    length. scroll-snap-stop stays 'normal' so a fast flick can cross several beats at once. */
-.act1__snap {
+.scrolly__snap {
   height: 100svh;
   scroll-snap-align: start;
   pointer-events: none;
@@ -396,11 +380,11 @@ a {
 
 /* Copy lives top-left in the sky zone — no card; a dark text-shadow carries contrast over the
    light overcast sky. Beats stack in the same spot and cross-fade on scroll. */
-.act1__copy {
+.scrolly__copy {
   position: absolute;
   inset: 0;
 }
-.act1__beat {
+.scrolly__beat {
   position: absolute;
   top: clamp(var(--space-xl), 12vh, 132px);
   left: var(--space-lg);
@@ -417,10 +401,10 @@ a {
      cross-fade, so no CSS transition here. */
   will-change: opacity, transform;
 }
-.act1__beat.is-active {
+.scrolly__beat.is-active {
   pointer-events: auto; /* so the "Dive deeper" button is clickable */
 }
-.act1__eyebrow {
+.scrolly__eyebrow {
   font-size: var(--font-size-caption);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -428,27 +412,27 @@ a {
   opacity: 0.82;
   text-shadow: 0 1px 12px rgba(5, 12, 14, 0.6);
 }
-.act1__headline {
+.scrolly__headline {
   font-size: var(--font-size-display);
   line-height: var(--line-height-tight);
   font-weight: 700;
   color: var(--color-text-primary);
   text-shadow: 0 2px 22px rgba(5, 12, 14, 0.85), 0 1px 3px rgba(5, 12, 14, 0.7);
 }
-.act1__body,
-.act1__transition {
+.scrolly__body,
+.scrolly__transition {
   font-size: var(--font-size-h2);
   line-height: 1.45;
   color: var(--color-text-primary);
   text-shadow: 0 2px 18px rgba(5, 12, 14, 0.82), 0 1px 3px rgba(5, 12, 14, 0.65);
 }
 /* Emphasised words + figures: bold and coloured (not italic), high-contrast accent. */
-.act1__body strong,
-.act1__transition strong {
+.scrolly__body strong,
+.scrolly__transition strong {
   font-weight: 700;
   color: var(--color-glow-teal-bright);
 }
-.act1__cta {
+.scrolly__cta {
   align-self: center;
   margin-top: var(--space-md);
   padding: var(--space-md) var(--space-xl);
@@ -458,7 +442,7 @@ a {
 }
 
 /* Scroll cue: subtle, just below the waterline. Fades out after the first scroll step. */
-.act1__cue {
+.scrolly__cue {
   position: absolute;
   top: 42%;
   left: 50%;
@@ -471,24 +455,24 @@ a {
   opacity: 0.7;
   transition: opacity 400ms var(--ease);
 }
-.act1__cue.is-hidden {
+.scrolly__cue.is-hidden {
   opacity: 0;
 }
-.act1__cue-label {
+.scrolly__cue-label {
   font-size: var(--font-size-caption);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   text-shadow: 0 1px 8px rgba(5, 12, 14, 0.6);
 }
-.act1__cue-chevron {
+.scrolly__cue-chevron {
   width: 11px;
   height: 11px;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   transform: rotate(45deg);
-  animation: act1-bob 1.8s var(--ease) infinite;
+  animation: scrolly-bob 1.8s var(--ease) infinite;
 }
-@keyframes act1-bob {
+@keyframes scrolly-bob {
   0%,
   100% {
     transform: rotate(45deg) translate(0, 0);
@@ -501,10 +485,10 @@ a {
 }
 
 /* Reduced-motion fallback: a plain stacked, scrollable list of all beats (no pin, no snap). */
-.act1--static {
+.scrolly--static {
   scroll-snap-type: none;
 }
-.act1--static .act1__static-copy {
+.scrolly--static .scrolly__static-copy {
   position: relative;
   min-height: 100%;
   display: flex;
@@ -512,21 +496,21 @@ a {
   gap: var(--space-xl);
   padding: clamp(var(--space-lg), 6vw, var(--space-xxl));
 }
-.act1--static .act1__beat {
+.scrolly--static .scrolly__beat {
   position: static;
   opacity: 1;
   pointer-events: auto;
   max-width: var(--text-max-width);
 }
-.act-placeholder__tag {
-  font-size: var(--font-size-caption);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  padding: var(--space-xs) var(--space-sm);
-  border: 1px dashed rgba(124, 145, 139, 0.4);
-  border-radius: 6px;
-  background: rgba(5, 12, 14, 0.35);
+
+/* Act 3's quiet, always-reachable Back (top-left): the scrolly beats fill the view, so this sits
+   above them (sibling of the scroll region) and stays clickable while the stage is click-through. */
+.scrolly__back-link {
+  position: absolute;
+  top: var(--space-lg);
+  left: var(--space-lg);
+  z-index: 5;
+  pointer-events: auto;
 }
 
 /* ------------------------------------------------------------------------- stat cards -- */

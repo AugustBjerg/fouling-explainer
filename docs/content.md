@@ -75,26 +75,27 @@ finding — not the decimal places.
 
 ## Act 3 — The implications
 
-**Headline:** *Clean on condition, not on the calendar.*
+Scrollytelling that mirrors Act 1 (shared `Scrolly` shell), with the ship clean again at the
+**bow**. Three beats step through the sky zone:
 
-**Beats:**
+**Beats (in order):**
 
-1. **For operators:** Don't clean on a fixed schedule. Fouling barely moves for months, then
-   takes off — so clean based on the ship's actual condition, watching the danger zones:
-   **warm water** and **periods spent slow or idle**.
-2. **For the method:** When the standard, physics-based tools can't be applied, **machine
-   learning is a viable fallback** for estimating fouling — but it's best as a **look-back
-   tool** (what did fouling cost us last voyage), not a live, real-time gauge.
-3. **The broader lesson:** A model you can **understand and trust** beat the fancier one here.
-   For physical systems with meaningful measurements, interpretable models stay relevant.
-
-**Closing line:** *The cost of a dirty hull is invisible — until you measure it. Then it's
-obvious what to do.*
+1. **Headline:** *Machine learning shows promise as a new way to quantify fouling.*
+2. **The prize:** Get the implementation right, and it could save the shipping industry
+   **billions of dollars** — and the world **millions of tonnes of greenhouse-gas emissions** —
+   every year.
+3. **Closing CTA:** *Dive deeper into the findings, or check out the code.* — then the two links.
 
 **Call to action — two links (open in a new tab):**
 
-- **Read the full thesis** → `<THESIS_PDF_URL>` *(placeholder — August to provide)*
-- **View the code on GitHub** → `<GITHUB_REPO_URL>` *(placeholder — August to provide)*
+- **Read the full thesis** → `/thesis.pdf` *(self-hosted — drop the PDF into `public/thesis.pdf`)*
+- **View the code on GitHub** → `https://github.com/AugustBjerg/Master-s-thesis`
+
+A quiet **Back** (top-left) returns to Act 2.
+
+> Earlier draft (superseded 2026-06-15) framed Act 3 as three static "operator / method / broader
+> lesson" takeaways with a *"Clean on condition, not on the calendar"* headline. Kept here as a
+> note in case the longer takeaways are wanted later; the live act uses the three beats above.
 
 ---
 

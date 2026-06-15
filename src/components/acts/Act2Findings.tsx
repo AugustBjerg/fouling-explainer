@@ -39,9 +39,11 @@ export default function Act2Findings({ days, onDaysChange, reducedMotion, onBack
           <div className="act2__value">
             {signed.format(Math.round(fuelCost))}
             <span className="act2__unit">USD/day</span>
+          </div>
+          <div className="act2__caption">
+            additional fuel cost
             <InfoTip label="About the added fuel cost" bullets={readoutNotes.fuelCost} />
           </div>
-          <div className="act2__caption">additional fuel cost</div>
         </div>
         <div className="act2__readout" style={warmStyle}>
           <div className="act2__value">

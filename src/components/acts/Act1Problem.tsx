@@ -1,16 +1,10 @@
 // Act 1 = The problem, as scrollytelling (docs/act1-design-spec.md). The ship is FIXED at the
-// bottom (rendered by App, clean throughout); scrolling steps the intro copy in the top "sky
-// zone" through six beats. State 0 is the headline; state 5 is the "Dive deeper" hand-off to
-// Act 2. Numbers come from src/data/findings.ts; copy is verbatim from the design spec.
-//
-// Motion feel: NATIVE scrolling + CSS scroll-snap (`scroll-snap-type: y mandatory`). The user
-// scrolls continuously and freely (a fast flick crosses several beats); when the scroll
-// momentum ends, the browser glides smoothly to the nearest beat. No JS snap, no debounce, no
-// focus lock. A sticky stage pins the copy + cue while empty per-beat snap panels supply the
-// scroll length and the snap points. `progress` (a float 0..BEATS.length-1) is read from the
-// scroll position and drives each beat's opacity + a small parallax drift (the cross-fade).
-// Reduced-motion: skip the snap and render the beats as a plain stacked, scrollable list.
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+// bottom (rendered by App, clean throughout, framed at the STERN); scrolling steps the intro copy
+// in the top "sky zone" through the beats below. The first beat is the headline; the last is the
+// "Try for yourself" hand-off to Act 2. The shared Scrolly shell owns the scroll motion + chrome;
+// this file just supplies the beats. Numbers come from src/data/findings.ts; copy is from the spec.
+import { type ReactNode } from 'react'
+import Scrolly from './Scrolly'
 import { context } from '../../data/findings'
 
 interface Act1ProblemProps {
@@ -70,8 +64,8 @@ function BeatContent({ beat, onAdvance }: { beat: Beat; onAdvance: () => void })
   if (beat.kind === 'cta') {
     return (
       <>
-        <p className="act1__transition">{TRANSITION}</p>
-        <button type="button" className="cta-link act1__cta" onClick={onAdvance}>
+        <p className="scrolly__transition">{TRANSITION}</p>
+        <button type="button" className="cta-link scrolly__cta" onClick={onAdvance}>
           Try for yourself ↓
         </button>
       </>
@@ -79,137 +73,23 @@ function BeatContent({ beat, onAdvance }: { beat: Beat; onAdvance: () => void })
   }
   return (
     <>
-      {beat.eyebrow && <p className="act1__eyebrow">{beat.eyebrow}</p>}
+      {beat.eyebrow && <p className="scrolly__eyebrow">{beat.eyebrow}</p>}
       {beat.kind === 'headline' ? (
-        <h1 className="act1__headline">{beat.text}</h1>
+        <h1 className="scrolly__headline">{beat.text}</h1>
       ) : (
-        <p className="act1__body">{beat.text}</p>
+        <p className="scrolly__body">{beat.text}</p>
       )}
     </>
   )
 }
 
 export default function Act1Problem({ onAdvance, reducedMotion }: Act1ProblemProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  // Continuous position: 0 at the first beat, BEATS.length-1 at the last. Drives the cross-fade.
-  const [progress, setProgress] = useState(0)
-
-  useEffect(() => {
-    if (reducedMotion) return
-    const el = containerRef.current
-    if (!el) return
-    const lastBeat = BEATS.length - 1
-    let raf = 0
-    let programmatic = false // true while our own snap-scroll is animating
-
-    const readProgress = () => {
-      const max = el.scrollHeight - el.clientHeight
-      setProgress(max > 0 ? (el.scrollTop / max) * lastBeat : 0)
-    }
-    const onScroll = () => {
-      if (raf) return
-      raf = requestAnimationFrame(() => {
-        raf = 0
-        readProgress()
-      })
-    }
-
-    // Safety net for the soft landing: CSS scroll-snap handles most stops, but it is unreliable
-    // across browsers/trackpads and sometimes leaves you mid-transition. When scrolling truly
-    // ends, if we are not on a beat, glide smoothly to the nearest one. (scrollend fires the
-    // moment scrolling stops, so there is no waiting/delay.)
-    const snapToNearest = () => {
-      if (programmatic) {
-        programmatic = false
-        return
-      }
-      const max = el.scrollHeight - el.clientHeight
-      if (max <= 0) return
-      const p = (el.scrollTop / max) * lastBeat
-      const nearest = Math.round(p)
-      if (Math.abs(p - nearest) < 0.03) return // already landed
-      programmatic = true
-      el.scrollTo({ top: (nearest / lastBeat) * max, behavior: 'smooth' })
-    }
-
-    el.addEventListener('scroll', onScroll, { passive: true })
-
-    // Prefer the native scrollend event; fall back to a short idle timer where unsupported.
-    let idle = 0
-    const onIdle = () => {
-      window.clearTimeout(idle)
-      idle = window.setTimeout(snapToNearest, 90)
-    }
-    const supportsScrollEnd = 'onscrollend' in window
-    if (supportsScrollEnd) {
-      el.addEventListener('scrollend', snapToNearest)
-    } else {
-      el.addEventListener('scroll', onIdle, { passive: true })
-    }
-
-    readProgress()
-    return () => {
-      el.removeEventListener('scroll', onScroll)
-      el.removeEventListener('scrollend', snapToNearest)
-      el.removeEventListener('scroll', onIdle)
-      window.clearTimeout(idle)
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [reducedMotion])
-
-  // Reduced-motion fallback: a plain stacked list, no snap, no fades, no scroll cue.
-  if (reducedMotion) {
-    return (
-      <section className="act1 act1--static" aria-label="The problem">
-        <div className="act1__static-copy">
-          {BEATS.map((beat, i) => (
-            <div key={i} className="act1__beat is-active">
-              <BeatContent beat={beat} onAdvance={onAdvance} />
-            </div>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  const activeBeat = Math.round(progress)
-  // The scroll cue is the nudge off the headline; it retires once you scroll past beat 0.
-  const cueHidden = progress > 0.5
-
   return (
-    <section className="act1" ref={containerRef} tabIndex={0} aria-label="The problem">
-      {/* Pinned stage: the copy (top-left, in the sky zone) + the scroll cue (below waterline). */}
-      <div className="act1__stage">
-        <div className="act1__copy" aria-live="polite">
-          {BEATS.map((beat, i) => {
-            // Cross-fade: full opacity at this beat, fading to 0 one beat away. A small parallax
-            // drift (upward as you scroll past) adds life without distracting.
-            const opacity = Math.max(0, 1 - Math.abs(progress - i))
-            const drift = (i - progress) * 14
-            const isActive = i === activeBeat
-            return (
-              <div
-                key={i}
-                className={`act1__beat${isActive ? ' is-active' : ''}`}
-                style={{ opacity, transform: `translateY(${drift}px)` }}
-                aria-hidden={!isActive}
-              >
-                <BeatContent beat={beat} onAdvance={onAdvance} />
-              </div>
-            )
-          })}
-        </div>
-
-        <div className={`act1__cue${cueHidden ? ' is-hidden' : ''}`} aria-hidden="true">
-          <span className="act1__cue-label">Scroll</span>
-          <span className="act1__cue-chevron" />
-        </div>
-      </div>
-
-      {/* Empty per-beat snap panels: they supply the scroll length and the snap points. */}
-      {BEATS.map((_, i) => (
-        <div key={i} className="act1__snap" aria-hidden="true" />
-      ))}
-    </section>
+    <Scrolly
+      count={BEATS.length}
+      ariaLabel="The problem"
+      reducedMotion={reducedMotion}
+      renderBeat={(i) => <BeatContent beat={BEATS[i]} onAdvance={onAdvance} />}
+    />
   )
 }

@@ -1,49 +1,80 @@
-// Act 3 — The implications. Three takeaways + the two CTA links. Hull glides to the stern,
-// clean again (the "after cleaning" payoff). Copy from docs/content.md.
-import { modelAccuracy } from '../../data/findings'
+// Act 3 = The implications, as scrollytelling that mirrors Act 1 (same shared Scrolly shell). The
+// ship is FIXED at the surface near the BOW (rendered by App, clean again — the "after a clean"
+// payoff) while three beats step through the sky zone: ML shows promise → the prize if you nail it
+// → the two ways out (thesis + code). A quiet, always-reachable Back (top-left) returns to Act 2.
+// Copy from docs/content.md; the GitHub link is the real repo, the thesis PDF is self-hosted.
+import { type ReactNode } from 'react'
+import Scrolly from './Scrolly'
 
-// TODO(links): August to provide. Until then these point nowhere — keep target/rel intact.
-const THESIS_PDF_URL = '#' // <THESIS_PDF_URL>
-const GITHUB_REPO_URL = '#' // <GITHUB_REPO_URL>
+interface Act3ImplicationsProps {
+  /** Step back to Act 2 (each act carries its own nav — there is no global control bar). */
+  onBack: () => void
+  reducedMotion?: boolean
+}
 
-export default function Act3Implications() {
+// The thesis PDF is self-hosted: drop the file into public/ as thesis.pdf (served at /thesis.pdf).
+const THESIS_PDF_URL = '/thesis.pdf'
+const GITHUB_REPO_URL = 'https://github.com/AugustBjerg/Master-s-thesis'
+
+interface Beat {
+  /** 'headline' = the big takeaway line; 'body' = a paragraph beat; 'cta' = the closing links. */
+  kind: 'headline' | 'body' | 'cta'
+  text?: ReactNode
+}
+
+const BEATS: Beat[] = [
+  {
+    kind: 'headline',
+    text: 'Machine learning shows promise as a new way to quantify fouling.',
+  },
+  {
+    kind: 'body',
+    text: (
+      <>
+        Get the implementation right, and it could save the shipping industry{' '}
+        <strong>billions of dollars</strong> — and the world{' '}
+        <strong>millions of tonnes of greenhouse-gas emissions</strong> — every year.
+      </>
+    ),
+  },
+  { kind: 'cta' },
+]
+
+function BeatContent({ beat }: { beat: Beat }) {
+  if (beat.kind === 'cta') {
+    return (
+      <>
+        <p className="scrolly__body">Dive deeper into the findings, or check out the code.</p>
+        <div className="cta-links">
+          <a className="cta-link" href={THESIS_PDF_URL} target="_blank" rel="noopener noreferrer">
+            Read the full thesis →
+          </a>
+          <a className="cta-link" href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
+            View the code on GitHub →
+          </a>
+        </div>
+      </>
+    )
+  }
+  return beat.kind === 'headline' ? (
+    <h1 className="scrolly__headline">{beat.text}</h1>
+  ) : (
+    <p className="scrolly__body">{beat.text}</p>
+  )
+}
+
+export default function Act3Implications({ onBack, reducedMotion }: Act3ImplicationsProps) {
   return (
-    <section className="act" aria-labelledby="act3-title">
-      <p className="act__eyebrow">The implications</p>
-      <h1 id="act3-title" className="act__title">
-        Clean on condition, not on the calendar.
-      </h1>
-
-      <ul className="act__beats">
-        <li className="act__beat">
-          <strong>For operators:</strong> don't clean on a fixed schedule. Fouling barely moves
-          for months, then takes off — clean on the ship's actual condition, watching the danger
-          zones: warm water and time spent slow or idle.
-        </li>
-        <li className="act__beat">
-          <strong>For the method:</strong> when the standard physics-based tools can't be
-          applied, machine learning is a viable fallback — best as a look-back tool (what did
-          fouling cost us last voyage), not a live gauge.
-        </li>
-        <li className="act__beat">
-          <strong>The broader lesson:</strong> a model you can understand and trust beat the
-          fancier one here ({modelAccuracy.gam.errorPct}% vs {modelAccuracy.mlp.errorPct}% error).
-          For physical systems with meaningful measurements, interpretable models stay relevant.
-        </li>
-      </ul>
-
-      <p className="act__lead">
-        The cost of a dirty hull is invisible — until you measure it. Then it's obvious what to do.
-      </p>
-
-      <div className="cta-links">
-        <a className="cta-link" href={THESIS_PDF_URL} target="_blank" rel="noopener noreferrer">
-          Read the full thesis →
-        </a>
-        <a className="cta-link" href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-          View the code on GitHub →
-        </a>
-      </div>
-    </section>
+    <>
+      <Scrolly
+        count={BEATS.length}
+        ariaLabel="The implications"
+        reducedMotion={reducedMotion}
+        renderBeat={(i) => <BeatContent beat={BEATS[i]} />}
+      />
+      <button type="button" className="cta-link cta-link--ghost scrolly__back-link" onClick={onBack}>
+        ← Back
+      </button>
+    </>
   )
 }
