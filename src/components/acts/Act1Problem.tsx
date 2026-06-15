@@ -66,7 +66,7 @@ function BeatContent({ beat, onAdvance }: { beat: Beat; onAdvance: () => void })
       <>
         <p className="scrolly__transition">{TRANSITION}</p>
         <button type="button" className="cta-link scrolly__cta" onClick={onAdvance}>
-          Try for yourself ↓
+          Try for yourself
         </button>
       </>
     )
@@ -88,6 +88,7 @@ export default function Act1Problem({ onAdvance, reducedMotion }: Act1ProblemPro
     <Scrolly
       count={BEATS.length}
       ariaLabel="The problem"
+      cueLabel="Explore why"
       reducedMotion={reducedMotion}
       renderBeat={(i) => <BeatContent beat={BEATS[i]} onAdvance={onAdvance} />}
     />

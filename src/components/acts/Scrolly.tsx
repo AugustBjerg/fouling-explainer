@@ -18,12 +18,14 @@ interface ScrollyProps {
   renderBeat: (index: number, isActive: boolean) => ReactNode
   /** Accessible label for the scroll region. */
   ariaLabel: string
-  /** Show the "Scroll" nudge below the waterline (retires after the first step). Default true. */
+  /** Show the scroll nudge below the waterline (retires after the first step). Default true. */
   showCue?: boolean
+  /** Label on the scroll nudge. Default "Scroll". */
+  cueLabel?: string
   reducedMotion?: boolean
 }
 
-export default function Scrolly({ count, renderBeat, ariaLabel, showCue = true, reducedMotion }: ScrollyProps) {
+export default function Scrolly({ count, renderBeat, ariaLabel, showCue = true, cueLabel = 'Scroll', reducedMotion }: ScrollyProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   // Continuous position: 0 at the first beat, count-1 at the last. Drives the cross-fade.
   const [progress, setProgress] = useState(0)
@@ -110,6 +112,17 @@ export default function Scrolly({ count, renderBeat, ariaLabel, showCue = true, 
   // The scroll cue is the nudge off the first beat; it retires once you scroll past beat 0.
   const cueHidden = progress > 0.5
 
+  // Clicking the cue glides to the NEXT beat (one step) — it never skips to the next act.
+  const goToNextBeat = () => {
+    const el = containerRef.current
+    if (!el) return
+    const max = el.scrollHeight - el.clientHeight
+    if (max <= 0) return
+    const last = count - 1
+    const next = Math.min(last, Math.round(progress) + 1)
+    el.scrollTo({ top: (next / last) * max, behavior: 'smooth' })
+  }
+
   return (
     <section className="scrolly" ref={containerRef} tabIndex={0} aria-label={ariaLabel}>
       {/* Pinned stage: the copy (top, in the sky zone) + the scroll cue (below waterline). */}
@@ -135,10 +148,16 @@ export default function Scrolly({ count, renderBeat, ariaLabel, showCue = true, 
         </div>
 
         {showCue && (
-          <div className={`scrolly__cue${cueHidden ? ' is-hidden' : ''}`} aria-hidden="true">
-            <span className="scrolly__cue-label">Scroll</span>
+          <button
+            type="button"
+            className={`scrolly__cue${cueHidden ? ' is-hidden' : ''}`}
+            onClick={goToNextBeat}
+            tabIndex={cueHidden ? -1 : 0}
+            aria-label={`${cueLabel} — go to the next beat`}
+          >
+            <span className="scrolly__cue-label">{cueLabel}</span>
             <span className="scrolly__cue-chevron" />
-          </div>
+          </button>
         )}
       </div>
 

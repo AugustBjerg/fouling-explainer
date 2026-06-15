@@ -5,6 +5,25 @@ change; date every entry. Newest at top.
 
 ---
 
+## 2026-06-15 — Deployment: Vercel + cookieless analytics (LinkedIn launch)
+
+- **Host = Vercel (free Hobby tier)**, deployed from the existing GitHub repo
+  `AugustBjerg/fouling-explainer` (branch `master`); pushes auto-deploy. **Free `*.vercel.app`
+  subdomain** — no custom domain (out of scope / costs money). Vite preset auto-detected
+  (`npm run build` → `dist`); **no `vercel.json` and no `base` change needed** (root-served, single
+  page, no client routing).
+- **Analytics = `@vercel/analytics`** (`<Analytics />` mounted in `src/main.tsx`). This is a
+  **deliberate, August-approved exception** to the CLAUDE.md "no third-party scripts that phone
+  home" guardrail. Chosen because it is **cookieless / no PII** (no cookie banner) and **first-party**
+  (script served from the same Vercel domain). Visit/referrer/country/device stats must be enabled
+  once in the Vercel dashboard (Settings → Analytics). It is a no-op when not hosted on Vercel.
+- **Social preview added** to `index.html` (Open Graph + Twitter card + meta description) so the
+  LinkedIn link renders a card. `og:url`/`og:image` use absolute `https://fouling-explainer.vercel.app`
+  URLs — **update the domain if the real subdomain differs**. **August must add `public/og-image.png`
+  at 1200×630** (a framed screenshot of the hull scene); the card has no image until it exists.
+
+---
+
 ## 2026-06-15 — Act 3 built as scrollytelling mirroring Act 1
 
 - **Act 3 is now real** (replaces the placeholder) and is **scroll-driven like Act 1**, not

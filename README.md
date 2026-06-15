@@ -25,3 +25,10 @@ npm run dev      # local dev server (Vite)
 npm run build    # production build → dist/
 npm run preview  # preview the production build locally
 ```
+
+## Deployment
+
+Deployed on **Vercel** (free tier). Pushes to `master` auto-deploy; the live site is at the
+project's `*.vercel.app` subdomain. Visit stats come from **Vercel Web Analytics** (cookieless,
+first-party — `@vercel/analytics`), enabled in the Vercel dashboard. See
+[`docs/memory.md`](docs/memory.md) for the full deployment decision.

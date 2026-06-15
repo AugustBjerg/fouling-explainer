@@ -11,6 +11,7 @@ export const color = {
   deepWaterRaised: '#102528', // cards, panels, raised surfaces
   glowTeal: '#5E8C82', // dialed-down accent + ambient light (never neon)
   glowTealSoft: 'rgba(94,140,130,0.12)', // ambient caustics, rim light, hover washes
+  glowTealFill: 'rgba(94,140,130,0.3)', // muted green button fill (visible but low-contrast)
   glowTealBright: '#3FA890', // higher-contrast accent for emphasized words/figures in copy
   signalRust: '#B07A4E', // the single warm signal — readouts only
   signalRustDim: '#7E5C42', // readout at low values, before it warms up

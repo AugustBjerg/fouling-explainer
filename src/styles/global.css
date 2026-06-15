@@ -52,13 +52,18 @@ a {
   position: relative;
   flex: 1;
   overflow: hidden;
-  /* daytime backdrop behind the SVG (the SVG paints its own sky/sea; this just blends edges):
-     overcast sky above, daylit sea below */
+  /* Daytime backdrop behind the SVG. This is NOT just an edge blend: during the Act 2 zoom-out
+     glide the hull SVG is scaled from a cached raster, so its far-bleed sky/sea (SeaAndSky.tsx)
+     can't fill the screen mid-transition and the margins briefly fall back to THIS gradient. So
+     it must match the SURFACE scene the glide lands on — same sky/sea tokens, waterline low in
+     the frame (the ship sits in the bottom ~35%, per acts.ts ACT_SHIP_DROP) — so the shrinking
+     SVG box blends into it instead of reading as a hard rectangle. */
   background: linear-gradient(
     180deg,
     var(--color-sky-top) 0%,
-    var(--color-sky-horizon) 49%,
-    var(--color-sea-lit) 52%,
+    var(--color-sky-horizon) 58%,
+    var(--color-sea-surface) 63%,
+    var(--color-sea-lit) 66%,
     var(--color-sea-deep) 100%
   );
 }
@@ -454,9 +459,18 @@ a {
   color: var(--color-text-primary);
   opacity: 0.7;
   transition: opacity 400ms var(--ease);
+  /* it's a button now: strip the default chrome and re-enable clicks over the stage */
+  background: none;
+  border: none;
+  padding: var(--space-xs) var(--space-sm);
+  pointer-events: auto;
+}
+.scrolly__cue:hover {
+  opacity: 1;
 }
 .scrolly__cue.is-hidden {
   opacity: 0;
+  pointer-events: none;
 }
 .scrolly__cue-label {
   font-size: var(--font-size-caption);
@@ -691,7 +705,7 @@ a {
   padding: var(--space-sm) var(--space-lg);
   border-radius: 999px;
   border: 1px solid var(--color-glow-teal);
-  background: var(--color-glow-teal-soft);
+  background: var(--color-glow-teal-fill);
   color: var(--color-text-primary);
   text-decoration: none;
 }

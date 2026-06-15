@@ -63,10 +63,10 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [currentAct])
 
-  // The hull only shows the visitor's fouling in Act 2; Act 1 and Act 3 read as clean
-  // (the "before" and the "after a clean" payoff). The set value still persists in state,
-  // so returning to Act 2 restores where they left the slider.
-  const hullDays = currentAct === 2 ? daysSinceCleaning : 0
+  // The fouling the visitor sets in Act 2 persists on the hull everywhere — when the camera
+  // pulls back out to the surface (Acts 1 & 3) the same fouling stays on the ship rather than
+  // snapping clean. (Starts at 0, so Act 1 still reads clean until they touch the slider.)
+  const hullDays = daysSinceCleaning
 
   // Act 2 is the slow, cinematic dive below the waterline; the surface acts glide quickly.
   const glideMs = currentAct === 2 ? motion.glideSlowMs : motion.glideMs
