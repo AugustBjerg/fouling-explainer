@@ -27,7 +27,7 @@ const TRANSITION =
 const BEATS: Beat[] = [
   {
     kind: 'headline',
-    text: 'The ocean is slowly eating fuel budgets in the shipping industry',
+    text: 'Marine organisms are slowly eating fuel budgets in the shipping industry',
   },
   {
     kind: 'body',
