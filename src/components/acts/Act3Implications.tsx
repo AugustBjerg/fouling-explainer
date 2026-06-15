@@ -25,7 +25,7 @@ interface Beat {
 const BEATS: Beat[] = [
   {
     kind: 'headline',
-    text: 'Machine learning shows promise as a new way to quantify fouling',
+    text: 'Machine learning shows promise as a new way to quantify the effects of biofouling',
   },
   {
     kind: 'body',
